@@ -1,1 +1,3 @@
-# arkpz-pzpi-22-7-lisovyi-nykyta
+ПЗПІ-22-7
+
+Лісовий Нікіта
