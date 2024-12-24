@@ -11,7 +11,7 @@ import os
 cipher = Fernet(os.getenv('SECRET_KEY_Fernet'))
 
 
-class UserDevice(db.Model):
+class MobileDevice(db.Model):
     __tablename__ = 'user_device'
 
     user_device_id = db.Column(

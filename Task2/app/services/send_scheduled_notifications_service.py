@@ -1,7 +1,7 @@
 from flask_mail import Message
 from app import mail, db
 from datetime import date
-from app.models import UserScheduledWeatherNotification, UserDevice
+from app.models import UserScheduledWeatherNotification, MobileDevice
 from flask import jsonify
 from app.utils import ErrorHandler
 import requests
@@ -20,7 +20,7 @@ def send_scheduled_notifications(app):
                 if user.email_confirmed:
                     send_email_notification(user.email, notification.city_id, notification.notification_date)
 
-                devices = UserDevice.query.filter_by(user_id=user.user_id).all()
+                devices = MobileDevice.query.filter_by(user_id=user.user_id).all()
                 for device in devices:
                     device_token = device.get_device_token()
                     if device_token:

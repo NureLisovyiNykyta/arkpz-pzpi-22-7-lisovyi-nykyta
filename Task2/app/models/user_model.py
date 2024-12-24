@@ -5,6 +5,7 @@ import uuid
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
+from app.models.role_model import Role
 from app.utils import ErrorHandler
 import os
 
@@ -16,6 +17,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'user'
 
     user_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    role_id = db.Column(UUID(as_uuid=True), db.ForeignKey('role.role_id', ondelete='CASCADE'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     birthday = db.Column(db.Date)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -25,18 +27,23 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     email_confirmed = db.Column(db.Boolean, default=False)
 
-    # Connection with UserDevice
+    role = db.relationship('Role', back_populates='users')
+
+    subscriptions = db.relationship('Subscription', back_populates='user')
+
     devices = db.relationship(
-        'UserDevice',
+        'MobileDevice',
         back_populates='user',
         cascade="all, delete-orphan"
     )
 
     homes = db.relationship(
-        'UserHome',
+        'Home',
         back_populates='user',
         cascade="all, delete-orphan"
     )
+
+    sensors = db.relationship('Sensor', back_populates='user')
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -73,7 +80,9 @@ class User(db.Model, UserMixin):
             if not name or not email:
                 raise ValueError("Name and email are required for registration.")
 
-            user = cls(name=name, email=email)
+            role = Role.query.filter_by(role_name="user").first()
+
+            user = cls(name=name, email=email, role_id = role.role_id)
 
             if password:
                 user.set_password(password)
