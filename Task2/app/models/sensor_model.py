@@ -15,11 +15,6 @@ class Sensor(db.Model):
         db.ForeignKey('home.home_id', ondelete='CASCADE'),
         nullable=False
     )
-    user_id = db.Column(
-        UUID(as_uuid=True),
-        db.ForeignKey('user.user_id', ondelete='NO ACTION'),
-        nullable=True
-    )
     name = db.Column(db.String(100), nullable=False)
     type = db.Column(db.String(50), nullable=False)
     is_closed = db.Column(db.Boolean, default=False)
@@ -29,7 +24,6 @@ class Sensor(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     home = db.relationship('Home', back_populates='sensors')
-    user = db.relationship('User', back_populates='sensors', lazy=True)
 
     @classmethod
     def get_all_sensors(cls, home_id):

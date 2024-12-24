@@ -21,6 +21,14 @@ class Subscription(db.Model):
     plan = db.relationship('SubscriptionPlan', back_populates='subscriptions')
 
     @classmethod
+    def get_current_subscription(cls, user_id):
+        try:
+            current_subscription = cls.query.filter_by(user_id=user_id, is_active=True).first()
+            return current_subscription
+        except Exception as e:
+            raise RuntimeError("Database error while getting user current subscription") from e
+
+    @classmethod
     def create_basic_subscription(cls, user_id):
         try:
             existing_subscription = cls.query.filter_by(user_id=user_id, is_active=True).first()

@@ -27,6 +27,9 @@ class Config:
 
     SCHEDULER_API_ENABLED = True
 
+    STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+    STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+
     PERMANENT_SESSION_LIFETIME = timedelta(hours=3)
 
     # CORS configuration

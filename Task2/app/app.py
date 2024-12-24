@@ -5,6 +5,7 @@ from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_cors import CORS
+import stripe
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -28,11 +29,14 @@ def create_app():
     oauth.init_app(app)
     mail.init_app(app)
 
+    stripe.api_key = app.config["STRIPE_SECRET_KEY"]
+
     with app.app_context():
         db.create_all()
 
-    from app.routes import auth_bp, user_profile_bp
+    from app.routes import auth_bp, user_profile_bp, payments_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_profile_bp)
+    app.register_blueprint(payments_bp,  url_prefix='/payments')
 
     return app

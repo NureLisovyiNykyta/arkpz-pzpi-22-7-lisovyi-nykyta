@@ -14,7 +14,7 @@ def send_email_confirmation(user):
         token = s.dumps(user.email, salt='email-confirm-salt')
         confirmation_url = url_for('auth.confirm_email', token=token, _external=True)
 
-        with open("app/templates/email_confirmation.html", "r") as html_file:
+        with open("templates/email_confirmation.html", "r") as html_file:
             html_template = html_file.read()
 
         html_body = render_template_string(
@@ -51,7 +51,7 @@ def verify_email_token(token):
 
         user.verify_email()
 
-        with open("app/templates/email_confirmation_success.html", "r") as html_file:
+        with open("templates/email_confirmation_success.html", "r") as html_file:
             success_html_template = html_file.read()
 
         success_html_body = render_template_string(
@@ -62,7 +62,7 @@ def verify_email_token(token):
         return success_html_body
 
     except PermissionError as pe:
-        with open("app/templates/email_confirmation_error.html", "r") as html_file:
+        with open("templates/email_confirmation_error.html", "r") as html_file:
             error_html_template = html_file.read()
 
         error_html_body = render_template_string(
@@ -73,7 +73,7 @@ def verify_email_token(token):
         return error_html_body
 
     except RuntimeError as re:
-        with open("app/templates/email_confirmation_error.html", "r") as html_file:
+        with open("templates/email_confirmation_error.html", "r") as html_file:
             error_html_template = html_file.read()
 
         error_html_body = render_template_string(
@@ -83,7 +83,7 @@ def verify_email_token(token):
         return error_html_body
 
     except Exception as e:
-        with open("app/templates/email_confirmation_error.html", "r") as html_file:
+        with open("templates/email_confirmation_error.html", "r") as html_file:
             error_html_template = html_file.read()
 
         error_html_body = render_template_string(

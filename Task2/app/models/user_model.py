@@ -22,7 +22,7 @@ class User(db.Model, UserMixin):
     birthday = db.Column(db.Date)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(256))
-    google_id = db.Column(db.String(128), unique=True)
+    google_id = db.Column(db.String(128))
     google_refresh_token = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     email_confirmed = db.Column(db.Boolean, default=False)
@@ -42,8 +42,6 @@ class User(db.Model, UserMixin):
         back_populates='user',
         cascade="all, delete-orphan"
     )
-
-    sensors = db.relationship('Sensor', back_populates='user')
 
     def set_password(self, password):
         self.password = generate_password_hash(password)

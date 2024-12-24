@@ -23,7 +23,7 @@ def send_password_reset_email(data):
         new_password = generate_random_password()
         update_password(user, new_password)
 
-        with open("app/templates/password_reset_email.html", "r") as html_file:
+        with open("templates/password_reset_email.html", "r") as html_file:
             html_template = html_file.read()
 
         html_body = render_template_string(

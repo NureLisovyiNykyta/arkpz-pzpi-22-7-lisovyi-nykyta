@@ -7,7 +7,7 @@ class ErrorHandler:
         if isinstance(error, HTTPException):
             response = jsonify({
                 "error": error.name,
-                "message": message or error.description
+                "message": message + error.description
             })
             response.status_code = status_code + error.code
         else:
