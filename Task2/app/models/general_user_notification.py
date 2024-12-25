@@ -56,4 +56,3 @@ class GeneralUserNotification(db.Model):
                 message="Database error while retrieving notifications",
                 status_code=500
             )
-

@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from flask import jsonify
 from app.models.subscription_model import Subscription
+from app.services.mobile_sequrity_notification_service import send_sensor_activity_change_notification
 from app.utils import ErrorHandler
 
 class Sensor(db.Model):
@@ -114,6 +115,8 @@ class Sensor(db.Model):
 
             sensor.is_active = new_activity
             db.session.commit()
+
+            send_sensor_activity_change_notification(user_id, sensor, new_activity)
 
             return jsonify({"message": f"Sensor activity was set as {new_activity}."}), 200
 

@@ -5,6 +5,7 @@ import uuid
 from flask import jsonify
 from app.models.default_security_mode_model import DefaultSecurityMode
 from app.models.subscription_model import Subscription
+from app.services.mobile_sequrity_notification_service import send_security_mode_change_notification
 from app.utils import ErrorHandler
 
 
@@ -208,6 +209,8 @@ class Home(db.Model):
 
             home.default_mode_id = new_mode.mode_id
             db.session.commit()
+
+            send_security_mode_change_notification(user_id, home, new_mode)
 
             return jsonify({"message": f"Default security mode changed to '{new_mode_name}' and sensors updated."}), 200
 

@@ -70,11 +70,7 @@ def check_subscription_expiration(app):
                     if user.email_confirmed:
                         send_subscription_canceled_email(user, subscription)
 
-                    devices = MobileDevice.query.filter_by(user_id=user.user_id).all()
-                    for device in devices:
-                        device_token = device.get_device_token()
-                        if device_token:
-                            send_subscription_cancelled_notification(device_token, user, subscription)
+                    send_subscription_cancelled_notification(user, subscription)
 
             db.session.commit()
 

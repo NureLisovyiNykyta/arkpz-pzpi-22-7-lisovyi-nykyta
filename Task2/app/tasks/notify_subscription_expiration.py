@@ -25,11 +25,7 @@ def notify_subscription_expiration(app):
                     if user.email_confirmed:
                         send_subscription_expiration_email(user, subscription, days_left)
 
-                    devices = MobileDevice.query.filter_by(user_id=user.user_id).all()
-                    for device in devices:
-                        device_token = device.get_device_token()
-                        if device_token:
-                            send_subscription_expiration_notification(device_token, user, subscription, days_left)
+                    send_subscription_expiration_notification(user, subscription, days_left)
 
     except Exception as e:
         return ErrorHandler.handle_error(
