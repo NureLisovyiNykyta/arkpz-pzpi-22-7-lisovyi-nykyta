@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirmation Success</title>
+    <style>
+        body {
+            background-color: #b5e3fe;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .block-success {
+            background: white;
+            color: black;
+            border-radius: 1em;
+            padding: 20px;
+            box-shadow: 0 2px 15px rgba(140, 207, 140, 0.7);
+            width: 70%;
+            max-width: 700px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="block-success">
+        <h1>Email Confirmation Successful!</h1>
+        <p>Dear {{ user.name }},</p>
+        <p>Your email address {{ user.email }} has been confirmed successfully!</p>
+        <p>Now you can continue login process where you left off</p>
+    </div>
+</body>
+</html>
