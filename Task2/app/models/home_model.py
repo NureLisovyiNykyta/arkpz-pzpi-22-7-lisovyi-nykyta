@@ -31,7 +31,7 @@ class Home(db.Model):
     @classmethod
     def get_all_homes(cls, user_id):
         try:
-            homes = cls.query.filter_by(user_id=user_id, is_archived=False).all()
+            homes = cls.query.filter_by(user_id=user_id).all()
             homes_list = [
                 {
                     "home_id": str(home.home_id),
@@ -39,7 +39,8 @@ class Home(db.Model):
                     "address": home.address,
                     "created_at": home.created_at.isoformat(),
                     "default_mode_id": str(home.default_mode_id),
-                    "default_mode_name": home.default_mode.mode_name
+                    "default_mode_name": home.default_mode.mode_name,
+                     "is_archived": home.is_archived
                 } for home in homes
             ]
             return jsonify({"homes": homes_list}), 200

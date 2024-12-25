@@ -6,3 +6,5 @@ from app.models.subscription_plan_model import SubscriptionPlan
 from app.models.default_security_mode_model import DefaultSecurityMode
 from app.models.home_model import Home
 from app.models.sensor_model import Sensor
+from app.models.general_user_notification import GeneralUserNotification
+from app.models.security_user_notification import SecurityUserNotification

@@ -9,7 +9,6 @@ from app.models.role_model import Role
 from app.utils import ErrorHandler
 import os
 
-
 cipher = Fernet(os.getenv('SECRET_KEY_Fernet'))
 
 
@@ -30,7 +29,6 @@ class User(db.Model, UserMixin):
     role = db.relationship('Role', back_populates='users')
 
     subscriptions = db.relationship('Subscription', back_populates='user')
-    sensors = db.relationship('Sensor', back_populates='user')
 
     devices = db.relationship(
         'MobileDevice',

@@ -15,11 +15,7 @@ class Sensor(db.Model):
         db.ForeignKey('home.home_id', ondelete='CASCADE'),
         nullable=False
     )
-    user_id = db.Column(
-        UUID(as_uuid=True),
-        db.ForeignKey('user.user_id', ondelete='NO ACTION'),
-        nullable=True
-    )
+    user_id = db.Column(db.UUID(as_uuid=True), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     type = db.Column(db.String(50), nullable=False)
     is_closed = db.Column(db.Boolean, default=False)
@@ -29,12 +25,11 @@ class Sensor(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     home = db.relationship('Home', back_populates='sensors')
-    user = db.relationship('User', back_populates='sensors', lazy=True)
 
     @classmethod
     def get_all_sensors(cls, home_id):
         try:
-            sensors = cls.query.filter_by(home_id=home_id, is_archived=False).all()
+            sensors = cls.query.filter_by(home_id=home_id).all()
             sensors_list = [
                 {
                     "sensor_id": str(sensor.sensor_id),
@@ -43,7 +38,8 @@ class Sensor(db.Model):
                     "is_closed": sensor.is_closed,
                     "is_active": sensor.is_active,
                     "is_security_breached": sensor.is_security_breached,
-                    "created_at": sensor.created_at.isoformat()
+                    "created_at": sensor.created_at.isoformat(),
+                    "is_archived": sensor.is_archived
                 }
                 for sensor in sensors
             ]
