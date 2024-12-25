@@ -50,21 +50,21 @@ def create_app():
 
     firebase_admin.initialize_app(cred)
 
-    from app.tasks import notify_subscription_ending, check_subscription_ending
+    from app.tasks import notify_subscription_expiration, check_subscription_expiration
     scheduler.add_job(
         id='notify_subscription_ending',
-        func=lambda: notify_subscription_ending(app),
+        func=lambda: notify_subscription_expiration(app),
         trigger='interval',
         seconds=60,
         max_instances=1
     )
     scheduler.add_job(
         id='check_subscription_ending',
-        func=lambda: check_subscription_ending(app),
+        func=lambda: check_subscription_expiration(app),
         trigger='interval',
         seconds=60,
         max_instances=1
     )
-    scheduler.start()
+    # scheduler.start()
 
     return app

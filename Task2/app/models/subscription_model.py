@@ -174,8 +174,6 @@ class Subscription(db.Model):
             db.session.add(new_subscription)
             db.session.commit()
 
-            return jsonify({"message": "Basic subscription created successfully."}), 200
-
         except ValueError as ve:
             raise ErrorHandler.handle_validation_error(str(ve))
         except Exception as e:

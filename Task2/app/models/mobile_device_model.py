@@ -12,7 +12,7 @@ cipher = Fernet(os.getenv('SECRET_KEY_Fernet'))
 
 
 class MobileDevice(db.Model):
-    __tablename__ = 'user_device'
+    __tablename__ = 'mobile_device'
 
     user_device_id = db.Column(
         UUID(as_uuid=True),

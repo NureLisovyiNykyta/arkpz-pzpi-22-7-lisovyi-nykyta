@@ -28,7 +28,7 @@ def register_user(data):
             raise ValueError('User already exists.')
 
         user = User.register_user(data)
-        Subscription.create_basic_subscription(user)
+        Subscription.create_basic_subscription(user.user_id)
 
         if not user.email_confirmed:
             send_email_confirmation(user)

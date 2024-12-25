@@ -65,7 +65,7 @@ def handle_google_callback():
                 'refresh_token': token.get('refresh_token'),
             }
             user = User.google_register_user(data)
-            Subscription.create_basic_subscription(user)
+            Subscription.create_basic_subscription(user.user_id)
             user.verify_email()
 
             flask_login.login_user(user)
