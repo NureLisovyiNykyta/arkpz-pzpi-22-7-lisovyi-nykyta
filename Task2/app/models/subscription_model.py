@@ -105,7 +105,8 @@ class Subscription(db.Model):
 
             existing_subscription = cls.query.filter_by(user_id=user_id, is_active=True).first()
             if existing_subscription:
-                raise ValueError("User already has an active subscription.")
+                existing_subscription.is_active = False
+                existing_subscription.end_date = datetime.now(timezone.utc)
 
             new_subscription = cls(
                 user_id=user_id,

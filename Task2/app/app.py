@@ -6,11 +6,16 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_cors import CORS
 import stripe
+from flask_apscheduler import APScheduler
+import firebase_admin
+from firebase_admin import credentials
 
+cred = credentials.Certificate('google-services.json')
 db = SQLAlchemy()
 login_manager = LoginManager()
 oauth = OAuth()
 mail = Mail()
+scheduler = APScheduler()
 
 def create_app():
     app = Flask(__name__)
@@ -28,6 +33,7 @@ def create_app():
     login_manager.init_app(app)
     oauth.init_app(app)
     mail.init_app(app)
+    scheduler.init_app(app)
 
     stripe.api_key = app.config["STRIPE_SECRET_KEY"]
 
@@ -41,5 +47,24 @@ def create_app():
     app.register_blueprint(mobile_device_bp)
     app.register_blueprint(subscription_bp)
     app.register_blueprint(payments_bp,  url_prefix='/payments')
+
+    firebase_admin.initialize_app(cred)
+
+    from app.tasks import notify_subscription_ending, check_subscription_ending
+    scheduler.add_job(
+        id='notify_subscription_ending',
+        func=lambda: notify_subscription_ending(app),
+        trigger='interval',
+        seconds=60,
+        max_instances=1
+    )
+    scheduler.add_job(
+        id='check_subscription_ending',
+        func=lambda: check_subscription_ending(app),
+        trigger='interval',
+        seconds=60,
+        max_instances=1
+    )
+    scheduler.start()
 
     return app
