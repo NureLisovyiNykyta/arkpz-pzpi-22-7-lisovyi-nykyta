@@ -1,2 +1,0 @@
-from app.tasks.check_subscription_expiration import check_subscription_expiration
-from app.tasks.notify_subscription_expiration import notify_subscription_expiration
