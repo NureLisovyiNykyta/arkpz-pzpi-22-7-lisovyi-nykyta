@@ -30,6 +30,7 @@ class User(db.Model, UserMixin):
     role = db.relationship('Role', back_populates='users')
 
     subscriptions = db.relationship('Subscription', back_populates='user')
+    sensors = db.relationship('Sensor', back_populates='user')
 
     devices = db.relationship(
         'MobileDevice',

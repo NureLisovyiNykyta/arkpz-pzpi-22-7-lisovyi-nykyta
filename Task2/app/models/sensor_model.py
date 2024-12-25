@@ -15,6 +15,11 @@ class Sensor(db.Model):
         db.ForeignKey('home.home_id', ondelete='CASCADE'),
         nullable=False
     )
+    user_id = db.Column(
+        UUID(as_uuid=True),
+        db.ForeignKey('user.user_id', ondelete='NO ACTION'),
+        nullable=True
+    )
     name = db.Column(db.String(100), nullable=False)
     type = db.Column(db.String(50), nullable=False)
     is_closed = db.Column(db.Boolean, default=False)
@@ -24,6 +29,7 @@ class Sensor(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     home = db.relationship('Home', back_populates='sensors')
+    user = db.relationship('User', back_populates='sensors', lazy=True)
 
     @classmethod
     def get_all_sensors(cls, home_id):
@@ -52,13 +58,14 @@ class Sensor(db.Model):
             )
 
     @classmethod
-    def add_sensor(cls, user_id, home_id, data):
+    def add_sensor(cls, user_id, data):
         try:
+            home_id = data.get('home_id')
             name = data.get('name')
             type = data.get('type')
 
-            if not name or not type:
-                raise ValueError("Name and type are required.")
+            if not home_id or not name or not type:
+                raise ValueError("Home id, name and type are required.")
 
             home = cls.query.filter_by(home_id=home_id, user_id=user_id, is_archived=False).first()
             if not home:
@@ -86,16 +93,25 @@ class Sensor(db.Model):
             )
 
     @classmethod
-    def delete_sensor(cls, user_id, sensor_id):
+    def set_sensor_activity(cls, user_id, data):
         try:
+            sensor_id = data.get('sensor_id')
+            new_activity = data.get('new_activity')
+
+            if not sensor_id or not new_activity:
+                raise ValueError("Sensor id, new activity are required.")
+
+            if not isinstance(new_activity, bool):
+                raise ValueError("New activity must be a boolean value.")
+
             sensor = cls.query.filter_by(user_id=user_id, sensor_id=sensor_id).first()
             if not sensor:
                 raise ValueError("Sensor not found for the specified user.")
 
-            db.session.delete(sensor)
+            sensor.is_active = new_activity
             db.session.commit()
 
-            return jsonify({"message": "Sensor was deleted successfully."}), 200
+            return jsonify({"message": f"Sensor activity was set as {new_activity}."}), 200
 
         except ValueError as ve:
             return ErrorHandler.handle_validation_error(str(ve))
@@ -103,6 +119,6 @@ class Sensor(db.Model):
             db.session.rollback()
             return ErrorHandler.handle_error(
                 e,
-                message="Database error while deleting sensor",
+                message="Database error while setting sensor activity",
                 status_code=500
             )

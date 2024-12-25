@@ -1,8 +1,12 @@
+from celery.worker.strategy import default
+
 from app import db
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from flask import jsonify
+
+from app.models import Sensor
 from app.models.default_security_mode_model import DefaultSecurityMode
 from app.utils import ErrorHandler
 
@@ -115,6 +119,9 @@ class Home(db.Model):
 
             for sensor in home.sensors:
                 sensor.is_archived = True
+                sensor.is_closed = False
+                sensor.is_active = False
+                sensor.is_security_breached = False
 
             db.session.commit()
             return jsonify({"message": "Home and its sensors archived successfully."}), 200
@@ -130,8 +137,14 @@ class Home(db.Model):
             )
 
     @classmethod
-    def change_default_security_mode(cls, user_id, home_id, new_mode_name):
+    def set_default_security_mode(cls, user_id, data):
         try:
+            home_id = data.get('home_id')
+            new_mode_name = data.get('new_mode_name')
+
+            if not home_id or not new_mode_name:
+                raise ValueError("Home ID and new mode name are required.")
+
             home = cls.query.filter_by(user_id=user_id, home_id=home_id, is_archived=False).first()
             if not home:
                 raise ValueError("Active home not found for the user.")
@@ -140,19 +153,22 @@ class Home(db.Model):
             if not new_mode:
                 raise ValueError("Invalid security mode.")
 
-            home.default_mode_id = new_mode.mode_id
-
-            # Update sensor activity based on the new mode
             if new_mode_name == "security":
-                for sensor in home.sensors:
-                    if not sensor.is_archived:
-                        sensor.is_active = True
-            elif new_mode_name == "safety":
-                for sensor in home.sensors:
-                    if not sensor.is_archived:
-                        sensor.is_active = False
+                if any(not sensor.is_closed and not sensor.is_archived for sensor in home.sensors):
+                    cls._set_sensors_to_safety(home)
+                    safety_mode = DefaultSecurityMode.query.filter_by(mode_name="safety").first()
+                    home.default_mode_id = safety_mode.mode_id
+                    db.session.commit()
+                    return jsonify({"message": "Security mode cannot be set! Safety mode was set."}), 200
 
+                cls._activate_sensors(home)
+
+            elif new_mode_name == "safety":
+                cls._set_sensors_to_safety(home)
+
+            home.default_mode_id = new_mode.mode_id
             db.session.commit()
+
             return jsonify({"message": f"Default security mode changed to '{new_mode_name}' and sensors updated."}), 200
 
         except ValueError as ve:
@@ -165,3 +181,16 @@ class Home(db.Model):
                 status_code=500
             )
 
+    @staticmethod
+    def _activate_sensors(home):
+        for sensor in home.sensors:
+            if not sensor.is_archived:
+                sensor.is_active = True
+
+    @staticmethod
+    def _set_sensors_to_safety(home):
+        for sensor in home.sensors:
+            if not sensor.is_archived:
+                sensor.is_active = False
+                sensor.is_closed = False
+                sensor.is_security_breached = False

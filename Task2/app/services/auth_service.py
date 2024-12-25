@@ -1,4 +1,4 @@
-from app.models import User
+from app.models import User, Subscription
 from app import login_manager
 from app.services.email_confirm_service import send_email_confirmation
 from app.utils import ErrorHandler, JwtUtils
@@ -28,6 +28,8 @@ def register_user(data):
             raise ValueError('User already exists.')
 
         user = User.register_user(data)
+        Subscription.create_basic_subscription(user)
+
         if not user.email_confirmed:
             send_email_confirmation(user)
         return jsonify({'message': 'User registered successfully.'}), 201

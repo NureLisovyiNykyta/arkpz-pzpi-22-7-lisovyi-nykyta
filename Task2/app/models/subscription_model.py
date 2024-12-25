@@ -29,27 +29,59 @@ class Subscription(db.Model):
             raise RuntimeError("Database error while getting user current subscription") from e
 
     @classmethod
-    def create_basic_subscription(cls, user_id):
+    def get_current_subscription_info(cls, user_id):
         try:
-            existing_subscription = cls.query.filter_by(user_id=user_id, is_active=True).first()
-            if existing_subscription:
-                raise ValueError("User already has an active subscription.")
+            current_subscription = cls.query.filter_by(user_id=user_id, is_active=True).first()
 
-            plan = SubscriptionPlan.query.filter_by(name='basic').first()
+            if not current_subscription:
+                raise ValueError("No active subscription found for the user.")
+
+            plan = SubscriptionPlan.query.filter_by(plan_id=current_subscription.plan_id).first()
             if not plan:
                 raise ValueError("Subscription plan not found.")
 
-            new_subscription = cls(
-                user_id=user_id,
-                plan_id=plan.plan_id,
-                end_date=datetime.now(timezone.utc) + timedelta(days=plan.duration_days),
-                is_active=True,
+            subscription_info = {
+                "subscription_id": str(current_subscription.subscription_id),
+                "user_id": str(current_subscription.user_id),
+                "plan": {
+                    "plan_id": str(plan.plan_id),
+                    "name": plan.name,
+                    "price": plan.price,
+                    "duration_days": plan.duration_days,
+                },
+                "start_date": current_subscription.start_date.isoformat(),
+                "end_date": current_subscription.end_date.isoformat() if current_subscription.end_date else None,
+                "is_active": current_subscription.is_active,
+            }
+
+            return jsonify(subscription_info), 200
+
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while retrieving subscription info",
+                status_code=500
             )
 
-            db.session.add(new_subscription)
+    @classmethod
+    def cancel_current_subscription(cls, user_id):
+        try:
+            current_subscription = cls.query.filter_by(user_id=user_id, is_active=True).first()
+
+            if not current_subscription:
+                raise ValueError("No active subscription found for the user.")
+
+            if current_subscription.plan.name == 'basic':
+                raise ValueError("Cannot cancel a basic subscription.")
+
+            current_subscription.is_active = False
+            current_subscription.end_date = datetime.now(timezone.utc)
+
             db.session.commit()
 
-            return jsonify({"message": "Basic subscription created successfully."}), 200
+            return jsonify({"message": "Subscription cancelled successfully."}), 200
 
         except ValueError as ve:
             return ErrorHandler.handle_validation_error(str(ve))
@@ -57,7 +89,7 @@ class Subscription(db.Model):
             db.session.rollback()
             return ErrorHandler.handle_error(
                 e,
-                message="Database error while creating basic subscription",
+                message="Database error while cancelling subscription",
                 status_code=500
             )
 
@@ -85,7 +117,7 @@ class Subscription(db.Model):
             db.session.add(new_subscription)
             db.session.commit()
 
-            return jsonify({"message": "Paid subscription purchased successfully."}), 200
+            return jsonify({"message": "Payment successful. Paid subscription created."}), 201
 
         except ValueError as ve:
             return ErrorHandler.handle_validation_error(str(ve))
@@ -104,14 +136,11 @@ class Subscription(db.Model):
             if not active_subscription:
                 raise ValueError("User does not have an active subscription.")
 
-            if active_subscription.end_date < datetime.now(timezone.utc):
-                active_subscription.end_date += timedelta(days=30)
-            else:
-                raise ValueError("Current subscription has no end date.")
+            active_subscription.end_date += timedelta(days=active_subscription.plan.duration_days)
 
             db.session.commit()
 
-            return jsonify({"message": "Subscription extended successfully."}), 200
+            return jsonify({"message": "Payment successful. Subscription extended."}), 200
 
         except ValueError as ve:
             return ErrorHandler.handle_validation_error(str(ve))
@@ -123,4 +152,31 @@ class Subscription(db.Model):
                 status_code=500
             )
 
+    @classmethod
+    def create_basic_subscription(cls, user_id):
+        try:
+            existing_subscription = cls.query.filter_by(user_id=user_id, is_active=True).first()
+            if existing_subscription:
+                raise ValueError("User already has an active subscription.")
 
+            plan = SubscriptionPlan.query.filter_by(name='basic').first()
+            if not plan:
+                raise ValueError("Subscription plan not found.")
+
+            new_subscription = cls(
+                user_id=user_id,
+                plan_id=plan.plan_id,
+                end_date=datetime.now(timezone.utc) + timedelta(days=plan.duration_days),
+                is_active=True,
+            )
+
+            db.session.add(new_subscription)
+            db.session.commit()
+
+            return jsonify({"message": "Basic subscription created successfully."}), 200
+
+        except ValueError as ve:
+            raise ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            db.session.rollback()
+            raise RuntimeError("Database error while creating basic subscription") from e

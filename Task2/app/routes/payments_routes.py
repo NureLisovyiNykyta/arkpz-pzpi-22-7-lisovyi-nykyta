@@ -31,6 +31,9 @@ def create_checkout_session():
             raise ValueError("Cannot purchase a basic plan as a paid subscription.")
 
         current_subscription = Subscription.get_current_subscription(user.user_id)
+        if not current_subscription:
+            raise ValueError("User does not have an active subscription..")
+
         if current_subscription.plan.name not in ['basic', plan.name]:
             raise ValueError(f"You already have '{current_subscription.plan.name}' subscription. "
                              f"Canceled it first to purchase another paid subscription!")
@@ -82,12 +85,10 @@ def payment_success():
 
         current_subscription = Subscription.get_current_subscription(user_id)
         if current_subscription.plan.name == 'basic':
-            Subscription.purchase_paid_subscription( user_id, plan_id)
-            return jsonify({"message": "Payment successful. Paid subscription created."}), 201
+            Subscription.purchase_paid_subscription(user_id, plan_id)
 
         if current_subscription.plan.name == plan.name:
-            Subscription.extend_subscription(user_id)
-            return jsonify({"message": "Payment successful. Subscription extended"}), 200
+            Subscription.extend_current_subscription(user_id)
 
     except ValueError as ve:
         return ErrorHandler.handle_validation_error(str(ve))

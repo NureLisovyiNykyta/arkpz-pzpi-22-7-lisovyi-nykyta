@@ -1,4 +1,4 @@
-from app.models import User
+from app.models import User, Subscription
 from app import oauth
 from app.utils import ErrorHandler, GoogleUtils, JwtUtils
 from flask import redirect, flash, url_for, session, jsonify
@@ -65,6 +65,7 @@ def handle_google_callback():
                 'refresh_token': token.get('refresh_token'),
             }
             user = User.google_register_user(data)
+            Subscription.create_basic_subscription(user)
             user.verify_email()
 
             flask_login.login_user(user)
