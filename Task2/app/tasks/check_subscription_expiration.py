@@ -1,6 +1,6 @@
 from app import db
 from datetime import datetime, timezone, timedelta
-from app.models import SubscriptionPlan, Subscription, MobileDevice, Home
+from app.models import SubscriptionPlan, Subscription, MobileDevice, Home, DefaultSecurityMode
 from app.services.email_subscription_notifications_service import send_subscription_canceled_email
 from app.services.mobile_subscription_notifications_service import send_subscription_cancelled_notification
 from app.utils import ErrorHandler
@@ -18,6 +18,13 @@ def check_subscription_expiration(app):
                 return ErrorHandler.handle_error(
                     None,
                     message="Basic plan not found.",
+                    status_code=404
+                )
+            default_mode = DefaultSecurityMode.query.filter_by(mode_name="safety").first()
+            if not default_mode:
+                return ErrorHandler.handle_error(
+                    None,
+                    message="Default mode not found.",
                     status_code=404
                 )
 
@@ -49,6 +56,7 @@ def check_subscription_expiration(app):
                     for home in user_homes:
                         if not home.is_archived:
                             home.is_archived = True
+                            home.default_mode_id = default_mode.mode_id
                             for sensor in home.sensors:
                                 if not sensor.is_archived:
                                     sensor.is_archived = True

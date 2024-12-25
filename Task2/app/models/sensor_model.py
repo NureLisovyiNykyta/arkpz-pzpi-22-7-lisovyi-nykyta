@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from flask import jsonify
+from app.models.subscription_model import Subscription
 from app.utils import ErrorHandler
 
 class Sensor(db.Model):
@@ -70,6 +71,14 @@ class Sensor(db.Model):
             if not home:
                 raise ValueError("Active home not found for the user.")
 
+            current_subscription = Subscription.get_current_subscription(user_id)
+            if not current_subscription:
+                raise ValueError("User does not have an active subscription.")
+
+            current_sensors_count = cls.query.filter_by(user_id=user_id).count()
+            if current_sensors_count >= current_subscription.plan.max_sensors:
+                raise ValueError("You have reached the maximum number of sensors allowed by your subscription.")
+
             new_sensor = cls(
                 home_id=home_id,
                 user_id=user_id,
@@ -119,5 +128,61 @@ class Sensor(db.Model):
             return ErrorHandler.handle_error(
                 e,
                 message="Database error while setting sensor activity",
+                status_code=500
+            )
+
+    @classmethod
+    def unarchive_sensor(cls, user_id, sensor_id):
+        try:
+            sensor = cls.query.filter_by(sensor_id=sensor_id, user_id=user_id, is_archived=True).first()
+            if not sensor:
+                raise ValueError("Archived sensor not found for the user.")
+
+            current_subscription = Subscription.get_current_subscription(user_id)
+            if not current_subscription:
+                raise ValueError("User does not have an active subscription.")
+
+            current_sensors_count = cls.query.filter_by(user_id=user_id).count()
+            if current_sensors_count >= current_subscription.plan.max_sensors:
+                raise ValueError("You have reached the maximum number of sensors allowed by your subscription.")
+
+            sensor.is_archived = False
+            db.session.commit()
+
+            return jsonify({"message": "Sensor unarchived successfully."}), 200
+
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            db.session.rollback()
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while unarchiving sensor",
+                status_code=500
+            )
+
+    @classmethod
+    def archive_sensor(cls, user_id, sensor_id):
+        try:
+            sensor = cls.query.filter_by(sensor_id=sensor_id, user_id=user_id, is_archived=False).first()
+            if not sensor:
+                raise ValueError("Active sensor not found for the user.")
+
+            sensor.is_archived = True
+            sensor.is_closed = False
+            sensor.is_active = False
+            sensor.is_security_breached = False
+
+            db.session.commit()
+
+            return jsonify({"message": "Sensor archived successfully."}), 200
+
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            db.session.rollback()
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while archiving sensor",
                 status_code=500
             )

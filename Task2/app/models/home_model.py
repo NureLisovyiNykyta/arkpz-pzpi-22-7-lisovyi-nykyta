@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from flask import jsonify
 from app.models.default_security_mode_model import DefaultSecurityMode
+from app.models.subscription_model import Subscription
 from app.utils import ErrorHandler
 
 
@@ -59,13 +60,21 @@ class Home(db.Model):
             if not name and not address:
                 raise ValueError("Name and address are required.")
 
+            current_subscription = Subscription.get_current_subscription(user_id)
+            if not current_subscription:
+                raise ValueError("User does not have an active subscription.")
+
+            current_homes_count = cls.query.filter_by(user_id=user_id).count()
+            if current_homes_count >= current_subscription.plan.max_homes:
+                raise ValueError("You have reached the maximum number of homes allowed by your subscription.")
+
             default_mode = DefaultSecurityMode.query.filter_by(mode_name="safety").first()
 
             new_home = cls(
                 user_id=user_id,
                 name=name,
                 address=address,
-                default_mode_id=default_mode.default_mode_id
+                default_mode_id=default_mode.mode_id
             )
             db.session.add(new_home)
             db.session.commit()
@@ -105,12 +114,46 @@ class Home(db.Model):
             )
 
     @classmethod
-    def archive_home(cls, user_id, home_id):
+    def unarchive_home(cls, user_id, home_id):
+        try:
+            home = cls.query.filter_by(home_id=home_id, user_id=user_id, is_archived=True).first()
+            if not home:
+                raise ValueError("Archived home not found for the user.")
+
+            current_subscription = Subscription.get_current_subscription(user_id)
+            if not current_subscription:
+                raise ValueError("User does not have an active subscription.")
+
+            current_homes_count = cls.query.filter_by(user_id=user_id).count()
+            if current_homes_count >= current_subscription.plan.max_homes:
+                raise ValueError("You have reached the maximum number of homes allowed by your subscription.")
+
+            home.is_archived = False
+
+            db.session.commit()
+
+            return jsonify({"message": "Home unarchived successfully."}), 200
+
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            db.session.rollback()
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while unarchiving home",
+                status_code=500
+            )
+
+    @classmethod
+    def archive_home_sensors(cls, user_id, home_id):
         try:
             home = cls.query.filter_by(user_id=user_id, home_id=home_id, is_archived=False).first()
             if not home:
                 raise ValueError("Active home not found for the user.")
 
+            default_mode = DefaultSecurityMode.query.filter_by(mode_name="safety").first()
+
+            home.default_mode_id = default_mode.mode_id
             home.is_archived = True
 
             for sensor in home.sensors:

@@ -64,9 +64,34 @@ def set_home_sensor_activity():
 def get_default_security_modes():
     return DefaultSecurityMode.get_all_default_modes()
 
-@security_bp.route('/set_home_security_mode', methods=['Put'])
+
+@security_bp.route('/archive_home_sensors/home', methods=['Put'])
 @auth_required
-def set_home_security_mode():
+def archive_home_sensors():
     user = request.current_user
-    data = request.get_json()
-    return Home.set_default_security_mode(user.user_id, data)
+    home_id = request.args.get('home')
+    return Home.archive_home_sensors(user.user_id, home_id)
+
+
+@security_bp.route('/unarchive_home/home', methods=['Put'])
+@auth_required
+def unarchive_home():
+    user = request.current_user
+    home_id = request.args.get('home')
+    return Home.unarchive_home(user.user_id, home_id)
+
+
+@security_bp.route('/archive_home/sensor', methods=['Put'])
+@auth_required
+def archive_sensor():
+    user = request.current_user
+    sensor_id = request.args.get('sensor')
+    return Sensor.archive_sensor(user.user_id, sensor_id)
+
+
+@security_bp.route('/unarchive_home/sensor', methods=['Put'])
+@auth_required
+def unarchive_sensor():
+    user = request.current_user
+    sensor_id = request.args.get('sensor')
+    return Sensor.unarchive_sensor(user.user_id, sensor_id)
