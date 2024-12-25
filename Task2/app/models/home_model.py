@@ -1,12 +1,8 @@
-from celery.worker.strategy import default
-
 from app import db
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from flask import jsonify
-
-from app.models import Sensor
 from app.models.default_security_mode_model import DefaultSecurityMode
 from app.utils import ErrorHandler
 
