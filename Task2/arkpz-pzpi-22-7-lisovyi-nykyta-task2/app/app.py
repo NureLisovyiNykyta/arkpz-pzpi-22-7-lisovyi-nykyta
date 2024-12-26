@@ -40,12 +40,13 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-    from app.routes import auth_bp, user_profile_bp, security_bp, mobile_device_bp, subscription_bp, payments_bp
+    from app.routes import auth_bp, user_profile_bp, security_bp, mobile_device_bp, subscription_bp, payments_bp, notification_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_profile_bp)
     app.register_blueprint(security_bp)
     app.register_blueprint(mobile_device_bp)
     app.register_blueprint(subscription_bp)
+    app.register_blueprint(notification_bp)
     app.register_blueprint(payments_bp,  url_prefix='/payments')
 
     firebase_admin.initialize_app(cred)

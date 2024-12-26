@@ -52,3 +52,60 @@ def auth_required(f):
         )
 
     return decorated
+
+def role_required(roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            # Проверка JWT
+            token = request.headers.get('Authorization')
+            if token:
+                try:
+                    if token.startswith("Bearer "):
+                        token = token.split(" ")[1]
+
+                    payload = JwtUtils.decode_jwt(token)
+                    user = User.query.get(payload['user_id'])
+                    if not user:
+                        return ErrorHandler.handle_error(
+                            None,
+                            message=f"User with ID '{payload['user_id']}' not found.",
+                            status_code=404
+                        )
+
+                    if user.role.role_name not in roles:
+                        return ErrorHandler.handle_error(
+                            None,
+                            message=f"User does not have the required role. Required roles: {roles}",
+                            status_code=403
+                        )
+
+                    request.current_user = user
+                except ValueError as ve:
+                    return ErrorHandler.handle_error(ve, status_code=401)
+                except Exception as e:
+                    return ErrorHandler.handle_error(
+                        e,
+                        message="Internal server error while token verify",
+                        status_code=500
+                    )
+                return f(*args, **kwargs)
+
+            if current_user.is_authenticated:
+                if current_user.role.role_name not in roles:
+                    return ErrorHandler.handle_error(
+                        None,
+                        message=f"User does not have the required role. Required roles: {roles}",
+                        status_code=403
+                    )
+                request.current_user = current_user
+                return f(*args, **kwargs)
+
+            return ErrorHandler.handle_error(
+                None,
+                message="Authentication required",
+                status_code=401
+            )
+
+        return decorated
+    return decorator

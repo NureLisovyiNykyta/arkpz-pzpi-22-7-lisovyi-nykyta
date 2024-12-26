@@ -1,16 +1,10 @@
 from app.utils import ErrorHandler
-from firebase_admin import messaging
-from app.models import GeneralUserNotification, MobileDevice
+from app.models import GeneralUserNotification
+from app.utils import send_notification
 
 
 def send_subscription_expiration_notification(user, subscription, days_left):
     try:
-        devices = MobileDevice.query.filter_by(user_id=user.user_id).all()
-        device_tokens = [device.get_device_token() for device in devices if device.get_device_token()]
-
-        if not device_tokens:
-            raise ValueError("No device tokens found for the user.")
-
         formatted_end_date = subscription.end_date.strftime('%A, %d %B %Y')
         title = "Subscription Expiration Notice"
         body=(f"Your {subscription.plan.name} subscription expires on {formatted_end_date}."
@@ -23,19 +17,6 @@ def send_subscription_expiration_notification(user, subscription, days_left):
             'cancel_in_days': f'{days_left}',
             'user_name': f'{user.name}',
         }
-
-        for token in device_tokens:
-            message = messaging.Message(
-                notification=messaging.Notification(
-                    title=title,
-                    body=body
-                ),
-                data=data,
-                token=token
-            )
-
-            response = messaging.send(message)
-            print('Successfully sent message:', response)
 
         GeneralUserNotification.create_notification(
             user_id=user.user_id,
@@ -51,6 +32,11 @@ def send_subscription_expiration_notification(user, subscription, days_left):
             },
         )
 
+        send_notification(user.user_id, title, body, data)
+
+
+    except ValueError as ve:
+        print(ErrorHandler.handle_validation_error(str(ve)))
     except Exception as e:
         return ErrorHandler.handle_error(
             e,
@@ -61,12 +47,6 @@ def send_subscription_expiration_notification(user, subscription, days_left):
 
 def send_subscription_cancelled_notification(user, subscription):
     try:
-        devices = MobileDevice.query.filter_by(user_id=user.user_id).all()
-        device_tokens = [device.get_device_token() for device in devices if device.get_device_token()]
-
-        if not device_tokens:
-            raise ValueError("No device tokens found for the user.")
-
         formatted_end_date = subscription.end_date.strftime('%A, %d %B %Y')
         title = "Subscription Cancellation Notice"
         body = (f"Your {subscription.plan.name} subscription has been canceled. "
@@ -79,19 +59,6 @@ def send_subscription_cancelled_notification(user, subscription):
             'end_date': f'{str(subscription.end_date)}',
             'user_name': f'{user.name}',
         }
-
-        for token in device_tokens:
-            message = messaging.Message(
-                notification=messaging.Notification(
-                    title=title,
-                    body=body
-                ),
-                data=data,
-                token=token
-            )
-
-            response = messaging.send(message)
-            print('Successfully sent notification:', response)
 
         GeneralUserNotification.create_notification(
             user_id=user.user_id,
@@ -106,6 +73,10 @@ def send_subscription_cancelled_notification(user, subscription):
             }
         )
 
+        send_notification(user.user_id, title, body, data)
+
+    except ValueError as ve:
+        print (ErrorHandler.handle_validation_error(str(ve)))
     except Exception as e:
         return ErrorHandler.handle_error(
             e,

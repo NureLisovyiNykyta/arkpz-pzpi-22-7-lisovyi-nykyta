@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from flask import jsonify
 from app.models.subscription_model import Subscription
+from app.models.home_model import Home
 from app.services.mobile_sequrity_notification_service import send_sensor_activity_change_notification
 from app.utils import ErrorHandler
 
@@ -64,7 +65,7 @@ class Sensor(db.Model):
             if not home_id or not name or not type:
                 raise ValueError("Home id, name and type are required.")
 
-            home = cls.query.filter_by(home_id=home_id, user_id=user_id, is_archived=False).first()
+            home = Home.query.filter_by(home_id=home_id, user_id=user_id, is_archived=False).first()
             if not home:
                 raise ValueError("Active home not found for the user.")
 
@@ -98,6 +99,28 @@ class Sensor(db.Model):
             )
 
     @classmethod
+    def delete_sensor(cls, user_id, sensor_id):
+        try:
+            sensor = cls.query.filter_by(user_id=user_id, sensor_id=sensor_id).first()
+            if not sensor:
+                raise ValueError("Sensor not found for the specified user.")
+
+            db.session.delete(sensor)
+            db.session.commit()
+
+            return jsonify({"message": "Sensor  was deleted successfully."}), 200
+
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            db.session.rollback()
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while deleting sensor",
+                status_code=500
+            )
+
+    @classmethod
     def set_sensor_activity(cls, user_id, data):
         try:
             sensor_id = data.get('sensor_id')
@@ -106,17 +129,18 @@ class Sensor(db.Model):
             if not sensor_id or not new_activity:
                 raise ValueError("Sensor id, new activity are required.")
 
-            if not isinstance(new_activity, bool):
+            bool_new_activity = new_activity.lower() in ['true', '1']
+            if not isinstance(bool_new_activity, bool):
                 raise ValueError("New activity must be a boolean value.")
 
             sensor = cls.query.filter_by(user_id=user_id, sensor_id=sensor_id).first()
             if not sensor:
                 raise ValueError("Sensor not found for the specified user.")
 
-            sensor.is_active = new_activity
+            sensor.is_active = bool_new_activity
             db.session.commit()
 
-            send_sensor_activity_change_notification(user_id, sensor, new_activity)
+            send_sensor_activity_change_notification(user_id, sensor, bool_new_activity)
 
             return jsonify({"message": f"Sensor activity was set as {new_activity}."}), 200
 

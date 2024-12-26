@@ -16,4 +16,11 @@ def get_general_notifications():
 @auth_required
 def get_security_notifications():
     user = request.current_user
-    return SecurityUserNotification.get_notifications_by_home(user.user_id)
+    return SecurityUserNotification.get_notifications_by_user(user.user_id)
+
+
+@notification_bp.route('/security_notifications_by_home/home', methods=['Get'])
+@auth_required
+def get_security_notifications_by_home():
+    home_id = request.args.get('home')
+    return SecurityUserNotification.get_notifications_by_home(home_id)

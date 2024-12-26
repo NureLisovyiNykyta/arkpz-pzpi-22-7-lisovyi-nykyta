@@ -28,11 +28,11 @@ def delete_user_home():
     return Home.delete_home(user.user_id, home_id)
 
 
-@security_bp.route('/home_sensors', methods=['Get'])
+@security_bp.route('/home_sensors/home', methods=['Get'])
 @auth_required
 def get_home_sensors():
-    user = request.current_user
-    return Sensor.get_all_sensors(user.user_id)
+    home_id = request.args.get('home')
+    return Sensor.get_all_sensors(home_id)
 
 
 @security_bp.route('/add_home_sensor', methods=['Post'])
@@ -43,7 +43,7 @@ def add_home_sensor():
     return Sensor.add_sensor(user.user_id, data)
 
 
-@security_bp.route('/delete_home_sensors/sensor', methods=['Post'])
+@security_bp.route('/delete_home_sensor/sensor', methods=['Post'])
 @auth_required
 def delete_home_sensor():
     user = request.current_user
@@ -65,6 +65,14 @@ def get_default_security_modes():
     return DefaultSecurityMode.get_all_default_modes()
 
 
+@security_bp.route('/set_default_security_mode', methods=['Put'])
+@auth_required
+def set_default_security_mode():
+    user = request.current_user
+    data = request.get_json()
+    return Home.set_default_security_mode(user.user_id, data)
+
+
 @security_bp.route('/archive_home_sensors/home', methods=['Put'])
 @auth_required
 def archive_home_sensors():
@@ -81,7 +89,7 @@ def unarchive_home():
     return Home.unarchive_home(user.user_id, home_id)
 
 
-@security_bp.route('/archive_home/sensor', methods=['Put'])
+@security_bp.route('/archive_sensor/sensor', methods=['Put'])
 @auth_required
 def archive_sensor():
     user = request.current_user
@@ -89,7 +97,7 @@ def archive_sensor():
     return Sensor.archive_sensor(user.user_id, sensor_id)
 
 
-@security_bp.route('/unarchive_home/sensor', methods=['Put'])
+@security_bp.route('/unarchive_sensor/sensor', methods=['Put'])
 @auth_required
 def unarchive_sensor():
     user = request.current_user
