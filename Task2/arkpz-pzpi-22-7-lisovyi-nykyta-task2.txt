@@ -1,0 +1,1477 @@
+Харківський університет радіоелектроніки
+Факультет комп'ютерних наук
+
+
+Кафедра програмної інженерії
+
+
+
+ЗВІТ
+до лабораторної роботи номер 2 
+з дисципліни
+"Аналіз та рефакторинг коду"
+на тему: " РОЗРОБКА БАЗИ ДАНИХ ДЛЯ СЕРВЕРНОЇ ЧАСТИНИ ПРОГРАМНОЇ СИСТЕМИ ТА ПРИКЛАДНОГО ПРОГРАМНОГО ІНТЕРФЕЙСУ (API)"
+
+
+
+
+Виконав ст. гр. ПЗПІ-22-4
+Лісовий Нікіта Андрійович
+
+Перевірив
+ст. викладач кафедри ПІ
+Сокорчук Ігор Петрович
+ 
+
+
+
+
+Харків 2024
+1 МЕТА
+
+Метою роботи є розробка бази даних для серверної частини та прикладного програмного інтерфейсу для програмної системи безпеки будинку з датчиками відкриття дверей та вікон.
+
+2 ХІД РОБОТИ
+
+Першим етапом виконання лабораторної роботи стало розроблення UML-діаграми прецедентів для програмної системи безпеки будинку з датчиками відкриття дверей та вікон. Цю діаграму наведено в Додатку А.
+Далі було побудовано ER-діаграму, яку наведено в Додатку Б.
+На основі створеної ER-діаграми було спроєктовано та реалізовано базу даних у ms sql. Діаграма структури бази даних наведена в Додатку В.
+Наступним кроком було розроблено REST API з використанням фреймворку Flask.
+Щоб спростити розробку та тестування, було створено документацію API з використанням Postman. Цю специфікацію наведено в Додатку Г.
+Кожен маршрут був протестований у Postman, а тестова колекція збережена для подальшої роботи. Відеозапис захисту наведено в Додатку Е.
+Для розробки серверної частини було обрано фреймворк Flask, що дозволяє швидко створювати RESTful API та ефективно взаємодіяти з клієнтськими додатками. Flask є легким і зручним інструментом для реалізації серверної логіки, що особливо важливо для проектів, де важлива швидкість розробки та простота інтеграції.
+База даних була реалізована на MS SQL, оскільки вона забезпечує надійне зберігання великих обсягів даних та є ефективною у роботі з транзакціями, що критично для обробки даних безпеки. MS SQL надає потужні інструменти для адміністрування, що дозволяє забезпечити високу стабільність системи навіть при великих навантаженнях.
+Для зручної роботи з базою даних було вибрано SQLAlchemy ORM, яке забезпечує простоту інтеграції Python з реляційними базами даних. Це дозволяє ефективно управляти даними та здійснювати взаємодію з MS SQL без необхідності писати складні SQL-запити вручну, зменшуючи ризик помилок.
+Для спрощення процесу автентифікації користувачів була реалізована реєстрація через Google за допомогою Google OAuth. Це дозволяє користувачам швидко реєструватися та входити в систему за допомогою своїх облікових записів Google, що підвищує зручність і безпеку.
+Для надсилання повідомлень на мобільні пристрої було використано Firebase Cloud Messaging (FCM), що дозволяє відправляти push-повідомлення на телефони користувачів або веб-додатки. Firebase забезпечує швидку доставку повідомлень та простоту інтеграції, що є важливим для оперативної реакції на події у системі безпеки.
+Оплату через Stripe було обрано для забезпечення зручного та безпечного процесу обробки платежів. Інтеграція з платіжною платформою Stripe дозволяє користувачам без проблем здійснювати фінансові транзакції, що є важливим аспектом для реалізації функціоналу преміум підписки.
+Увесь вихідний код проєкту розміщений у репозиторії GitHub, а основні частини коду наведені в Додатку Е.
+
+
+
+
+3 ВИСНОВКИ
+
+У ході виконання лабораторної роботи було розроблено та реалізовано основні компоненти програмної системи для безпеки будинку, зокрема UML-діаграму прецедентів, ER-діаграму та базу даних у MS SQL, що забезпечує ефективне зберігання та обробку даних. Було створено REST API за допомогою фреймворку Flask, що дозволило швидко реалізувати необхідний функціонал для взаємодії з клієнтськими додатками.
+Вибір технологій, таких як Flask для серверної частини, MS SQL для бази даних, SQLAlchemy ORM для роботи з базою даних, а також Google OAuth для реєстрації користувачів, Firebase Cloud Messaging для push-повідомлень та Stripe для обробки платежів, дозволив ефективно реалізувати необхідні функціональні можливості системи, забезпечити зручність користувачів і безпеку фінансових транзакцій.
+Підготовка документації API за допомогою Postman та тестування маршрутів дозволило забезпечити якісну перевірку системи на всіх етапах розробки. 
+
+
+ДОДАТОК А
+UML ДІАГРАМА ПРЕЦЕДЕНТІВ
+
+?
+Рисунок А – UML діаграма прецедентів
+
+
+ДОДАТОК Б
+ER ДІАГРАМА БАЗИ ДАНИХ
+
+Рисунок Б – ER діаграма бази даних
+
+
+ДОДАТОК В
+ДІАГРАМА СТРУКТУРИ БАЗИ ДАНИХ
+
+Рисунок В – Діаграма структури бази даних
+
+ДОДАТОК Г
+СПЕЦИФІКАЦІЯ API
+1{
+2	"info": {
+3		"_postman_id": "73dbb005-1acb-457e-9d5f-c0384123f432",
+4		"name": "Safe_Home",
+5		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+6		"_exporter_id": "33773660"
+7	},
+8	"item": [
+9		{
+10			"name": "auth",
+11			"item": [
+12				{
+13					"name": "register",
+14					"request": {
+15						"method": "POST",
+16						"header": [],
+17						"body": {
+18							"mode": "raw",
+19							"raw": "{\r\n    \"name\": \"Nikita\",\r\n    \"email\": \"nykyta.lisovyi@nure.ua\",\r\n    \"password\": \"12345678\"\r\n}",
+20							"options": {
+21								"raw": {
+22									"language": "json"
+23								}
+24							}
+25						},
+26						"url": {
+27							"raw": "http://127.0.0.1:5000/register",
+28							"protocol": "http",
+29							"host": [
+30								"127",
+31								"0",
+32								"0",
+33								"1"
+34							],
+35							"port": "5000",
+36							"path": [
+37								"register"
+38							]
+39						}
+40					},
+41					"response": []
+42				},
+43				{
+44					"name": "session login",
+45					"event": [
+46						{
+47							"listen": "test",
+48							"script": {
+49								"exec": [
+50									"if (pm.response.code === 200) {\r",
+51									"    var cookies = pm.cookies.get(\"session\");\r",
+52									"    pm.environment.set(\"session_cookie\", cookies);\r",
+53									"}\r",
+54									""
+55								],
+56								"type": "text/javascript",
+57								"packages": {}
+58							}
+59						}
+60					],
+61					"request": {
+62						"method": "POST",
+63						"header": [
+64							{
+65								"key": "Content-Type",
+66								"value": "application/json",
+67								"type": "text"
+68							}
+69						],
+70						"body": {
+71							"mode": "raw",
+72							"raw": "{\r\n    \"email\": \"nykyta.lisovyi@nure.ua\",\r\n    \"password\": \"12345678\"\r\n}",
+73							"options": {
+74								"raw": {
+75									"language": "json"
+76								}
+77							}
+78						},
+79						"url": {
+80							"raw": "http://127.0.0.1:5000/login",
+81							"protocol": "http",
+82							"host": [
+83								"127",
+84								"0",
+85								"0",
+86								"1"
+87							],
+88							"port": "5000",
+89							"path": [
+90								"login"
+91							]
+92						}
+93					},
+94					"response": []
+95				},
+96				{
+97					"name": "token login",
+98					"event": [
+99						{
+100							"listen": "test",
+101							"script": {
+102								"exec": [
+103									"const response = pm.response.json();\r",
+104									"if (response.token) {\r",
+105									"    pm.environment.set(\"token\", response.token);\r",
+106									"}\r",
+107									""
+108								],
+109								"type": "text/javascript",
+110								"packages": {}
+111							}
+112						}
+113					],
+114					"request": {
+115						"method": "POST",
+116						"header": [],
+117						"body": {
+118							"mode": "raw",
+119							"raw": "{\r\n    \"email\": \"nykyta.lisovyi@nure.ua\",\r\n    \"password\": \"12345678\"\r\n}",
+120							"options": {
+121								"raw": {
+122									"language": "json"
+123								}
+124							}
+125						},
+126						"url": {
+127							"raw": "http://127.0.0.1:5000/token_login",
+128							"protocol": "http",
+129							"host": [
+130								"127",
+131								"0",
+132								"0",
+133								"1"
+134							],
+135							"port": "5000",
+136							"path": [
+137								"token_login"
+138							]
+139						}
+140					},
+141					"response": []
+142				},
+143				{
+144					"name": "Reset password",
+145					"request": {
+146						"method": "POST",
+147						"header": [],
+148						"body": {
+149							"mode": "raw",
+150							"raw": "{\r\n  \"email\": \"nikita.lisovyy@gmail.com\"\r\n}",
+151							"options": {
+152								"raw": {
+153									"language": "json"
+154								}
+155							}
+156						},
+157						"url": {
+158							"raw": "http://127.0.0.1:5000/reset_password",
+159							"protocol": "http",
+160							"host": [
+161								"127",
+162								"0",
+163								"0",
+164								"1"
+165							],
+166							"port": "5000",
+167							"path": [
+168								"reset_password"
+169							]
+170						}
+171					},
+172					"response": []
+173				},
+174				{
+175					"name": "logout",
+176					"request": {
+177						"method": "POST",
+178						"header": [
+179							{
+180								"key": "Cookie",
+181								"value": "session={{session_cookie}}",
+182								"type": "text"
+183							},
+184							{
+185								"key": "Authorization",
+186								"value": "Bearer{{token}}",
+187								"type": "text",
+188								"disabled": true
+189							}
+190						],
+191						"url": {
+192							"raw": "http://127.0.0.1:5000/logout",
+193							"protocol": "http",
+194							"host": [
+195								"127",
+196								"0",
+197								"0",
+198								"1"
+199							],
+200							"port": "5000",
+201							"path": [
+202								"logout"
+203							]
+204						}
+205					},
+206					"response": []
+207				}
+208			]
+209		},
+210		{
+211			"name": "user_profile",
+212			"item": [
+213				{
+214					"name": "get user profile",
+215					"request": {
+216						"method": "GET",
+217						"header": [
+218							{
+219								"key": "Cookie",
+220								"value": "session={{session_cookie}}",
+221								"type": "text"
+222							}
+223						],
+224						"url": {
+225							"raw": "http://127.0.0.1:5000/profile",
+226							"protocol": "http",
+227							"host": [
+228								"127",
+229								"0",
+230								"0",
+231								"1"
+232							],
+233							"port": "5000",
+234							"path": [
+235								"profile"
+236							]
+237						}
+238					},
+239					"response": []
+240				},
+241				{
+242					"name": "update user profile",
+243					"request": {
+244						"method": "PUT",
+245						"header": [
+246							{
+247								"key": "Cookie",
+248								"value": "session={{session_cookie}}",
+249								"type": "text"
+250							}
+251						],
+252						"body": {
+253							"mode": "raw",
+254							"raw": "{\r\n    \"name\": \"\",\r\n    \"birthday\": \"2005-05-01\"\r\n}",
+255							"options": {
+256								"raw": {
+257									"language": "json"
+258								}
+259							}
+260						},
+261						"url": {
+262							"raw": "http://127.0.0.1:5000/update_profile",
+263							"protocol": "http",
+264							"host": [
+265								"127",
+266								"0",
+267								"0",
+268								"1"
+269							],
+270							"port": "5000",
+271							"path": [
+272								"update_profile"
+273							]
+274						}
+275					},
+276					"response": []
+277				},
+278				{
+279					"name": "update user password",
+280					"request": {
+281						"method": "PUT",
+282						"header": [
+283							{
+284								"key": "Cookie",
+285								"value": "session={{session_cookie}}",
+286								"type": "text"
+287							}
+288						],
+289						"body": {
+290							"mode": "raw",
+291							"raw": "{\r\n    \"old_password\": \"12345678\",\r\n    \"new_password\": \"11111111\"\r\n}",
+292							"options": {
+293								"raw": {
+294									"language": "json"
+295								}
+296							}
+297						},
+298						"url": {
+299							"raw": "http://127.0.0.1:5000/update_password",
+300							"protocol": "http",
+301							"host": [
+302								"127",
+303								"0",
+304								"0",
+305								"1"
+306							],
+307							"port": "5000",
+308							"path": [
+309								"update_password"
+310							]
+311						}
+312					},
+313					"response": []
+314				},
+315				{
+316					"name": "reset_password",
+317					"request": {
+318						"method": "POST",
+319						"header": [
+320							{
+321								"key": "Cookie",
+322								"value": "session={{session_cookie}}",
+323								"type": "text"
+324							}
+325						],
+326						"body": {
+327							"mode": "raw",
+328							"raw": "{\r\n    \"email\": \"nykyta.lisovyi@nure.ua\"\r\n}",
+329							"options": {
+330								"raw": {
+331									"language": "json"
+332								}
+333							}
+334						},
+335						"url": {
+336							"raw": "http://127.0.0.1:5000/reset_password",
+337							"protocol": "http",
+338							"host": [
+339								"127",
+340								"0",
+341								"0",
+342								"1"
+343							],
+344							"port": "5000",
+345							"path": [
+346								"reset_password"
+347							]
+348						}
+349					},
+350					"response": []
+351				}
+352			]
+353		},
+354		{
+355			"name": "mobile_device",
+356			"item": [
+357				{
+358					"name": "mobile_devices",
+359					"request": {
+360						"method": "GET",
+361						"header": [
+362							{
+363								"key": "Cookie",
+364								"value": "session={{session_cookie}}",
+365								"type": "text",
+366								"disabled": true
+367							}
+368						],
+369						"url": {
+370							"raw": "http://127.0.0.1:5000/mobile_devices",
+371							"protocol": "http",
+372							"host": [
+373								"127",
+374								"0",
+375								"0",
+376								"1"
+377							],
+378							"port": "5000",
+379							"path": [
+380								"mobile_devices"
+381							]
+382						}
+383					},
+384					"response": []
+385				},
+386				{
+387					"name": "add_mobile_device",
+388					"request": {
+389						"method": "POST",
+390						"header": [
+391							{
+392								"key": "Cookie",
+393								"value": "session={{session_cookie}}",
+394								"type": "text",
+395								"disabled": true
+396							}
+397						],
+398						"body": {
+399							"mode": "raw",
+400							"raw": "{\r\n    \"device_token\": \"device_token\",\r\n    \"device_info\": \"device_info\"\r\n}",
+401							"options": {
+402								"raw": {
+403									"language": "json"
+404								}
+405							}
+406						},
+407						"url": {
+408							"raw": "http://127.0.0.1:5000/add_mobile_device",
+409							"protocol": "http",
+410							"host": [
+411								"127",
+412								"0",
+413								"0",
+414								"1"
+415							],
+416							"port": "5000",
+417							"path": [
+418								"add_mobile_device"
+419							]
+420						}
+421					},
+422					"response": []
+423				},
+424				{
+425					"name": "delete_mobile_device",
+426					"request": {
+427						"method": "POST",
+428						"header": [
+429							{
+430								"key": "Cookie",
+431								"value": "session={{session_cookie}}",
+432								"type": "text",
+433								"disabled": true
+434							}
+435						],
+436						"body": {
+437							"mode": "raw",
+438							"raw": "{\r\n    \"device_token\": \"device_token\"\r\n}",
+439							"options": {
+440								"raw": {
+441									"language": "json"
+442								}
+443							}
+444						},
+445						"url": {
+446							"raw": "http://127.0.0.1:5000/delete_mobile_device",
+447							"protocol": "http",
+448							"host": [
+449								"127",
+450								"0",
+451								"0",
+452								"1"
+453							],
+454							"port": "5000",
+455							"path": [
+456								"delete_mobile_device"
+457							]
+458						}
+459					},
+460					"response": []
+461				}
+462			]
+463		},
+464		{
+465			"name": "notification_history",
+466			"item": [
+467				{
+468					"name": "general_notifications",
+469					"request": {
+470						"method": "GET",
+471						"header": [
+472							{
+473								"key": "Cookie",
+474								"value": "session={{session_cookie}}",
+475								"type": "text",
+476								"disabled": true
+477							}
+478						],
+479						"url": {
+480							"raw": "http://127.0.0.1:5000/general_notifications",
+481							"protocol": "http",
+482							"host": [
+483								"127",
+484								"0",
+485								"0",
+486								"1"
+487							],
+488							"port": "5000",
+489							"path": [
+490								"general_notifications"
+491							]
+492						}
+493					},
+494					"response": []
+495				},
+496				{
+497					"name": "security_notifications",
+498					"request": {
+499						"method": "GET",
+500						"header": [
+501							{
+502								"key": "Cookie",
+503								"value": "session={{session_cookie}}",
+504								"type": "text",
+505								"disabled": true
+506							}
+507						],
+508						"url": {
+509							"raw": "http://127.0.0.1:5000/security_notifications",
+510							"protocol": "http",
+511							"host": [
+512								"127",
+513								"0",
+514								"0",
+515								"1"
+516							],
+517							"port": "5000",
+518							"path": [
+519								"security_notifications"
+520							]
+521						}
+522					},
+523					"response": []
+524				},
+525				{
+526					"name": "security_notifications_by_home",
+527					"request": {
+528						"method": "GET",
+529						"header": [
+530							{
+531								"key": "Cookie",
+532								"value": "session={{session_cookie}}",
+533								"type": "text"
+534							}
+535						],
+536						"url": {
+537							"raw": "http://127.0.0.1:5000/home_sensors/home?home=b94be072-ab52-4b67-bb53-63b0ad60706d",
+538							"protocol": "http",
+539							"host": [
+540								"127",
+541								"0",
+542								"0",
+543								"1"
+544							],
+545							"port": "5000",
+546							"path": [
+547								"home_sensors",
+548								"home"
+549							],
+550							"query": [
+551								{
+552									"key": "home",
+553									"value": "b94be072-ab52-4b67-bb53-63b0ad60706d"
+554								}
+555							]
+556						}
+557					},
+558					"response": []
+559				}
+560			]
+561		},
+562		{
+563			"name": "security",
+564			"item": [
+565				{
+566					"name": "user_homes",
+567					"request": {
+568						"method": "GET",
+569						"header": [
+570							{
+571								"key": "Cookie",
+572								"value": "session={{session_cookie}}",
+573								"type": "text"
+574							}
+575						],
+576						"url": {
+577							"raw": "http://127.0.0.1:5000/user_homes",
+578							"protocol": "http",
+579							"host": [
+580								"127",
+581								"0",
+582								"0",
+583								"1"
+584							],
+585							"port": "5000",
+586							"path": [
+587								"user_homes"
+588							]
+589						}
+590					},
+591					"response": []
+592				},
+593				{
+594					"name": "add_user_home",
+595					"request": {
+596						"method": "POST",
+597						"header": [],
+598						"body": {
+599							"mode": "raw",
+600							"raw": "{\r\n    \"name\": \"home\",\r\n    \"address\": \"Kiev\"\r\n}",
+601							"options": {
+602								"raw": {
+603									"language": "json"
+604								}
+605							}
+606						},
+607						"url": {
+608							"raw": "http://127.0.0.1:5000/add_user_home",
+609							"protocol": "http",
+610							"host": [
+611								"127",
+612								"0",
+613								"0",
+614								"1"
+615							],
+616							"port": "5000",
+617							"path": [
+618								"add_user_home"
+619							]
+620						}
+621					},
+622					"response": []
+623				},
+624				{
+625					"name": "delete_user_home",
+626					"request": {
+627						"method": "POST",
+628						"header": [],
+629						"body": {
+630							"mode": "raw",
+631							"raw": "{\r\n    \"name\": \"MyHome\",\r\n    \"address\": \"Kiev\"\r\n}",
+632							"options": {
+633								"raw": {
+634									"language": "json"
+635								}
+636							}
+637						},
+638						"url": {
+639							"raw": "http://127.0.0.1:5000/delete_user_home/home?home=b94be072-ab52-4b67-bb53-63b0ad60706d",
+640							"protocol": "http",
+641							"host": [
+642								"127",
+643								"0",
+644								"0",
+645								"1"
+646							],
+647							"port": "5000",
+648							"path": [
+649								"delete_user_home",
+650								"home"
+651							],
+652							"query": [
+653								{
+654									"key": "home",
+655									"value": "b94be072-ab52-4b67-bb53-63b0ad60706d"
+656								}
+657							]
+658						}
+659					},
+660					"response": []
+661				},
+662				{
+663					"name": "home_sensors",
+664					"request": {
+665						"method": "GET",
+666						"header": [
+667							{
+668								"key": "Cookie",
+669								"value": "session={{session_cookie}}",
+670								"type": "text"
+671							}
+672						],
+673						"url": {
+674							"raw": "http://127.0.0.1:5000/home_sensors/home?home=b94be072-ab52-4b67-bb53-63b0ad60706d",
+675							"protocol": "http",
+676							"host": [
+677								"127",
+678								"0",
+679								"0",
+680								"1"
+681							],
+682							"port": "5000",
+683							"path": [
+684								"home_sensors",
+685								"home"
+686							],
+687							"query": [
+688								{
+689									"key": "home",
+690									"value": "b94be072-ab52-4b67-bb53-63b0ad60706d"
+691								}
+692							]
+693						}
+694					},
+695					"response": []
+696				},
+697				{
+698					"name": "add_home_sensor",
+699					"request": {
+700						"method": "POST",
+701						"header": [],
+702						"body": {
+703							"mode": "raw",
+704							"raw": "{\r\n    \"home_id\": \"b94be072-ab52-4b67-bb53-63b0ad60706d\",\r\n    \"name\": \"kitchen\",\r\n    \"type\": \"window\"\r\n}",
+705							"options": {
+706								"raw": {
+707									"language": "json"
+708								}
+709							}
+710						},
+711						"url": {
+712							"raw": "http://127.0.0.1:5000/add_home_sensor",
+713							"protocol": "http",
+714							"host": [
+715								"127",
+716								"0",
+717								"0",
+718								"1"
+719							],
+720							"port": "5000",
+721							"path": [
+722								"add_home_sensor"
+723							]
+724						}
+725					},
+726					"response": []
+727				},
+728				{
+729					"name": "delete_home_sensors",
+730					"request": {
+731						"method": "POST",
+732						"header": [],
+733						"body": {
+734							"mode": "raw",
+735							"raw": "{\r\n    \"name\": \"MyHome\",\r\n    \"address\": \"Kiev\"\r\n}",
+736							"options": {
+737								"raw": {
+738									"language": "json"
+739								}
+740							}
+741						},
+742						"url": {
+743							"raw": "http://127.0.0.1:5000/delete_home_sensor/sensor?sensor=e7fa15c2-e9d0-41f0-9ba6-abe73ffedbf8",
+744							"protocol": "http",
+745							"host": [
+746								"127",
+747								"0",
+748								"0",
+749								"1"
+750							],
+751							"port": "5000",
+752							"path": [
+753								"delete_home_sensor",
+754								"sensor"
+755							],
+756							"query": [
+757								{
+758									"key": "sensor",
+759									"value": "e7fa15c2-e9d0-41f0-9ba6-abe73ffedbf8"
+760								}
+761							]
+762						}
+763					},
+764					"response": []
+765				},
+766				{
+767					"name": "set_home_sensor_activity",
+768					"request": {
+769						"method": "PUT",
+770						"header": [],
+771						"body": {
+772							"mode": "raw",
+773							"raw": "{\r\n    \"sensor_id\": \"\",\r\n    \"new_activity\": \"True\"\r\n}",
+774							"options": {
+775								"raw": {
+776									"language": "json"
+777								}
+778							}
+779						},
+780						"url": {
+781							"raw": "http://127.0.0.1:5000/set_home_sensor_activity",
+782							"protocol": "http",
+783							"host": [
+784								"127",
+785								"0",
+786								"0",
+787								"1"
+788							],
+789							"port": "5000",
+790							"path": [
+791								"set_home_sensor_activity"
+792							]
+793						}
+794					},
+795					"response": []
+796				},
+797				{
+798					"name": "default_security_modes",
+799					"request": {
+800						"method": "GET",
+801						"header": [
+802							{
+803								"key": "Cookie",
+804								"value": "session={{session_cookie}}",
+805								"type": "text"
+806							}
+807						],
+808						"url": {
+809							"raw": "http://127.0.0.1:5000/default_security_modes",
+810							"protocol": "http",
+811							"host": [
+812								"127",
+813								"0",
+814								"0",
+815								"1"
+816							],
+817							"port": "5000",
+818							"path": [
+819								"default_security_modes"
+820							]
+821						}
+822					},
+823					"response": []
+824				},
+825				{
+826					"name": "set_default_security_mode",
+827					"request": {
+828						"method": "PUT",
+829						"header": [],
+830						"body": {
+831							"mode": "raw",
+832							"raw": "{\r\n    \"sensor_id\": \"\",\r\n    \"new_activity\": \"True\"\r\n}",
+833							"options": {
+834								"raw": {
+835									"language": "json"
+836								}
+837							}
+838						},
+839						"url": {
+840							"raw": "http://127.0.0.1:5000/set_home_sensor_activity",
+841							"protocol": "http",
+842							"host": [
+843								"127",
+844								"0",
+845								"0",
+846								"1"
+847							],
+848							"port": "5000",
+849							"path": [
+850								"set_home_sensor_activity"
+851							]
+852						}
+853					},
+854					"response": []
+855				},
+856				{
+857					"name": "archive_home_sensors",
+858					"request": {
+859						"method": "PUT",
+860						"header": [],
+861						"body": {
+862							"mode": "raw",
+863							"raw": "{\r\n    \"name\": \"MyHome\",\r\n    \"address\": \"Kiev\"\r\n}",
+864							"options": {
+865								"raw": {
+866									"language": "json"
+867								}
+868							}
+869						},
+870						"url": {
+871							"raw": "http://127.0.0.1:5000/archive_home_sensors/home?home=b94be072-ab52-4b67-bb53-63b0ad60706d",
+872							"protocol": "http",
+873							"host": [
+874								"127",
+875								"0",
+876								"0",
+877								"1"
+878							],
+879							"port": "5000",
+880							"path": [
+881								"archive_home_sensors",
+882								"home"
+883							],
+884							"query": [
+885								{
+886									"key": "home",
+887									"value": "b94be072-ab52-4b67-bb53-63b0ad60706d"
+888								}
+889							]
+890						}
+891					},
+892					"response": []
+893				},
+894				{
+895					"name": "unarchive_home",
+896					"request": {
+897						"method": "PUT",
+898						"header": [],
+899						"body": {
+900							"mode": "raw",
+901							"raw": "{\r\n    \"name\": \"MyHome\",\r\n    \"address\": \"Kiev\"\r\n}",
+902							"options": {
+903								"raw": {
+904									"language": "json"
+905								}
+906							}
+907						},
+908						"url": {
+909							"raw": "http://127.0.0.1:5000/unarchive_home/home?home=b94be072-ab52-4b67-bb53-63b0ad60706d",
+910							"protocol": "http",
+911							"host": [
+912								"127",
+913								"0",
+914								"0",
+915								"1"
+916							],
+917							"port": "5000",
+918							"path": [
+919								"unarchive_home",
+920								"home"
+921							],
+922							"query": [
+923								{
+924									"key": "home",
+925									"value": "b94be072-ab52-4b67-bb53-63b0ad60706d"
+926								}
+927							]
+928						}
+929					},
+930					"response": []
+931				},
+932				{
+933					"name": "archive_sensor",
+934					"request": {
+935						"method": "PUT",
+936						"header": [],
+937						"body": {
+938							"mode": "raw",
+939							"raw": "{\r\n    \"name\": \"MyHome\",\r\n    \"address\": \"Kiev\"\r\n}",
+940							"options": {
+941								"raw": {
+942									"language": "json"
+943								}
+944							}
+945						},
+946						"url": {
+947							"raw": "http://127.0.0.1:5000/archive_sensor/sensor?sensor=e7fa15c2-e9d0-41f0-9ba6-abe73ffedbf8",
+948							"protocol": "http",
+949							"host": [
+950								"127",
+951								"0",
+952								"0",
+953								"1"
+954							],
+955							"port": "5000",
+956							"path": [
+957								"archive_sensor",
+958								"sensor"
+959							],
+960							"query": [
+961								{
+962									"key": "sensor",
+963									"value": "e7fa15c2-e9d0-41f0-9ba6-abe73ffedbf8"
+964								}
+965							]
+966						}
+967					},
+968					"response": []
+969				},
+970				{
+971					"name": "unarchive_sensor",
+972					"request": {
+973						"method": "PUT",
+974						"header": [],
+975						"body": {
+976							"mode": "raw",
+977							"raw": "{\r\n    \"name\": \"MyHome\",\r\n    \"address\": \"Kiev\"\r\n}",
+978							"options": {
+979								"raw": {
+980									"language": "json"
+981								}
+982							}
+983						},
+984						"url": {
+985							"raw": "http://127.0.0.1:5000/archive_sensor/sensor?sensor=e7fa15c2-e9d0-41f0-9ba6-abe73ffedbf8",
+986							"protocol": "http",
+987							"host": [
+988								"127",
+989								"0",
+990								"0",
+991								"1"
+992							],
+993							"port": "5000",
+994							"path": [
+995								"archive_sensor",
+996								"sensor"
+997							],
+998							"query": [
+999								{
+1000									"key": "sensor",
+1001									"value": "e7fa15c2-e9d0-41f0-9ba6-abe73ffedbf8"
+1002								}
+1003							]
+1004						}
+1005					},
+1006					"response": []
+1007				}
+1008			]
+1009		},
+1010		{
+1011			"name": "subscription",
+1012			"item": [
+1013				{
+1014					"name": "subscription_plans",
+1015					"request": {
+1016						"method": "GET",
+1017						"header": [
+1018							{
+1019								"key": "Cookie",
+1020								"value": "session={{session_cookie}}",
+1021								"type": "text",
+1022								"disabled": true
+1023							}
+1024						],
+1025						"url": {
+1026							"raw": "http://127.0.0.1:5000/subscription_plans",
+1027							"protocol": "http",
+1028							"host": [
+1029								"127",
+1030								"0",
+1031								"0",
+1032								"1"
+1033							],
+1034							"port": "5000",
+1035							"path": [
+1036								"subscription_plans"
+1037							]
+1038						}
+1039					},
+1040					"response": []
+1041				},
+1042				{
+1043					"name": "current_subscription",
+1044					"request": {
+1045						"method": "GET",
+1046						"header": [
+1047							{
+1048								"key": "Cookie",
+1049								"value": "session={{session_cookie}}",
+1050								"type": "text"
+1051							}
+1052						],
+1053						"url": {
+1054							"raw": "http://127.0.0.1:5000/current_subscription",
+1055							"protocol": "http",
+1056							"host": [
+1057								"127",
+1058								"0",
+1059								"0",
+1060								"1"
+1061							],
+1062							"port": "5000",
+1063							"path": [
+1064								"current_subscription"
+1065							]
+1066						}
+1067					},
+1068					"response": []
+1069				},
+1070				{
+1071					"name": "cancel_current_subscription",
+1072					"request": {
+1073						"method": "PUT",
+1074						"header": [
+1075							{
+1076								"key": "Cookie",
+1077								"value": "session={{session_cookie}}",
+1078								"type": "text"
+1079							}
+1080						],
+1081						"url": {
+1082							"raw": "http://127.0.0.1:5000/cancel_current_subscription",
+1083							"protocol": "http",
+1084							"host": [
+1085								"127",
+1086								"0",
+1087								"0",
+1088								"1"
+1089							],
+1090							"port": "5000",
+1091							"path": [
+1092								"cancel_current_subscription"
+1093							]
+1094						}
+1095					},
+1096					"response": []
+1097				}
+1098			]
+1099		},
+1100		{
+1101			"name": "user mobile",
+1102			"item": [
+1103				{
+1104					"name": "get user profile",
+1105					"request": {
+1106						"method": "GET",
+1107						"header": [
+1108							{
+1109								"key": "Authorization",
+1110								"value": "Bearer {{token}}",
+1111								"type": "text"
+1112							}
+1113						],
+1114						"url": {
+1115							"raw": "http://127.0.0.1:5000/profile",
+1116							"protocol": "http",
+1117							"host": [
+1118								"127",
+1119								"0",
+1120								"0",
+1121								"1"
+1122							],
+1123							"port": "5000",
+1124							"path": [
+1125								"profile"
+1126							]
+1127						}
+1128					},
+1129					"response": []
+1130				},
+1131				{
+1132					"name": "update user profile",
+1133					"request": {
+1134						"method": "PUT",
+1135						"header": [
+1136							{
+1137								"key": "Authorization",
+1138								"value": "Bearer {{token}}",
+1139								"type": "text"
+1140							}
+1141						],
+1142						"body": {
+1143							"mode": "raw",
+1144							"raw": "{\r\n    \"name\": \"\",\r\n    \"birthday\": \"2005-05-01\"\r\n}",
+1145							"options": {
+1146								"raw": {
+1147									"language": "json"
+1148								}
+1149							}
+1150						},
+1151						"url": {
+1152							"raw": "http://127.0.0.1:5000/update_profile",
+1153							"protocol": "http",
+1154							"host": [
+1155								"127",
+1156								"0",
+1157								"0",
+1158								"1"
+1159							],
+1160							"port": "5000",
+1161							"path": [
+1162								"update_profile"
+1163							]
+1164						}
+1165					},
+1166					"response": []
+1167				},
+1168				{
+1169					"name": "update user password",
+1170					"request": {
+1171						"method": "PUT",
+1172						"header": [
+1173							{
+1174								"key": "Authorization",
+1175								"value": "Bearer {{token}}",
+1176								"type": "text"
+1177							}
+1178						],
+1179						"body": {
+1180							"mode": "raw",
+1181							"raw": "{\r\n    \"old_password\": \"12345678\",\r\n    \"new_password\": \"11111111\"\r\n}",
+1182							"options": {
+1183								"raw": {
+1184									"language": "json"
+1185								}
+1186							}
+1187						},
+1188						"url": {
+1189							"raw": "http://127.0.0.1:5000/update_password",
+1190							"protocol": "http",
+1191							"host": [
+1192								"127",
+1193								"0",
+1194								"0",
+1195								"1"
+1196							],
+1197							"port": "5000",
+1198							"path": [
+1199								"update_password"
+1200							]
+1201						}
+1202					},
+1203					"response": []
+1204				}
+1205			]
+1206		}
+1207	]
+1208}
+1209
+
+ДОДАТОК Д
+ПРОГРАМНИЙ КОД
+
+Приклад створення моделі для взаємодії серверної частини з БД.
+class Home(db.Model):
+    __tablename__ = 'home'
+
+    home_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False)
+    default_mode_id = db.Column(UUID(as_uuid=True), db.ForeignKey('default_security_mode.mode_id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    is_archived = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('User', back_populates='homes')
+    default_mode = db.relationship('DefaultSecurityMode', back_populates='homes')
+
+    sensors = db.relationship(
+        'Sensor',
+        back_populates='home',
+        cascade="all, delete-orphan"
+    )
+
+Приклад створення методів для взаємодії з моделью.
+@classmethod
+def add_home(cls, user_id, data):
+    try:
+        name = data.get('name')
+        address = data.get('address')
+
+        if not name and not address:
+            raise ValueError("Name and address are required.")
+
+        current_subscription = Subscription.get_current_subscription(user_id)
+        if not current_subscription:
+            raise ValueError("User does not have an active subscription.")
+
+        current_homes_count = cls.query.filter_by(user_id=user_id).count()
+        if current_homes_count >= current_subscription.plan.max_homes:
+            raise ValueError("You have reached the maximum number of homes allowed by your subscription.")
+
+        default_mode = DefaultSecurityMode.query.filter_by(mode_name="safety").first()
+
+        new_home = cls(
+            user_id=user_id,
+            name=name,
+            address=address,
+            default_mode_id=default_mode.mode_id
+        )
+        db.session.add(new_home)
+        db.session.commit()
+
+        return jsonify({"message": "Home added successfully."}), 201
+
+    except ValueError as ve:
+        return ErrorHandler.handle_validation_error(str(ve))
+    except Exception as e:
+        db.session.rollback()
+        return ErrorHandler.handle_error(
+            e,
+            message="Database error while adding home",
+            status_code=500
+        )
+
+Приклад створення роутів взаємодії серверної частини з клієнтами.
+@security_bp.route('/add_home_sensor', methods=['Post'])
+@auth_required
+def add_home_sensor():
+    user = request.current_user
+    data = request.get_json()
+    return Sensor.add_sensor(user.user_id, data)
+
+Приклад захисту роутів, перевірка вхіду через токен та сессію.
+def auth_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # Check if a token is provided (JWT)
+        token = request.headers.get('Authorization')
+        if token:
+            try:
+                # Remove "Bearer" prefix if present
+                if token.startswith("Bearer "):
+                    token = token.split(" ")[1]
+
+                # Decode the token and extract the payload
+                payload = JwtUtils.decode_jwt(token)
+                user = User.query.get(payload['user_id'])
+                if not user:
+                    return ErrorHandler.handle_error(
+                        None,
+                        message=f"User with ID '{payload['user_id']}' not found.",
+                        status_code=404
+                    )
+
+                # Attach the user to the request context
+                request.current_user = user
+            except ValueError as ve:
+                return ErrorHandler.handle_error(ve, status_code=401)
+            except Exception as e:
+                return ErrorHandler.handle_error(
+                    e,
+                    message="Iternal server error while token verify",
+                    status_code=500
+                )
+
+            return f(*args, **kwargs)
+
+        # If no JWT token is provided, check if the user is authenticated via Flask-Login session
+        if current_user.is_authenticated:
+            request.current_user = current_user
+            return f(*args, **kwargs)
+
+        # If neither session nor token is valid, return an error
+        return ErrorHandler.handle_error(
+            None,
+            message="Authentication required",
+            status_code=401
+        )
+
+    return decorated
+
+Приклад обробок помилок.
+class ErrorHandler:
+    @staticmethod
+    def handle_error(error, message=None, status_code=None):
+        if isinstance(error, HTTPException):
+            response = jsonify({
+                "error": error.name,
+                "message": message + error.description
+            })
+            response.status_code = status_code + error.code
+        else:
+            response = jsonify({
+                "error": "Internal Server Error",
+                "message": message + str(error)
+            })
+            response.status_code = status_code or 500
+        return response
+
+    @staticmethod
+    def handle_validation_error(message):
+        if isinstance(message, dict):
+            error_messages = []
+            for field, errors in message.items():
+                error_messages.append(f"{field}: {', '.join(errors)}")
+            message = "; ".join(error_messages)
+
+        return {
+            'success': False,
+            'message': message
+        }, 400
+Приклад нотифікацію через FCM.
+def send_notification(user_id, title, body, data):
+    devices = MobileDevice.query.filter_by(user_id=user_id).all()
+    device_tokens = [device.get_device_token() for device in devices if device.get_device_token()]
+
+    if not device_tokens:
+        raise ValueError("No device tokens found for the user.")
+
+    for token in device_tokens:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=body
+            ),
+            data=data,
+            token=token
+        )
+
+        response = messaging.send(message)
+        print('Successfully sent message:', response)
+
+
+
+
+
+
+
+
+
+ДОДАТОК Е
+ПОСИЛАННЯ 
+Посилання на файл з кодом в GitHub репозиторії:
+https://github.com/NureLisovyiNykyta/arkpz-pzpi-22-7-lisovyi-nykyta
+	
+Посилання на YouTube відео з презентацією:
+	https://youtu.be/SjKaBvwUbJ0
