@@ -33,9 +33,16 @@ class SecurityUserNotification(db.Model):
             sensor_id=sensor_id,
             data=data
         )
-        db.session.add(new_notification)
-        db.session.commit()
-        return new_notification
+        try:
+            db.session.add(new_notification)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while creating notification",
+                status_code=500
+            )
 
     @classmethod
     def get_notifications_by_home(cls, home_id):

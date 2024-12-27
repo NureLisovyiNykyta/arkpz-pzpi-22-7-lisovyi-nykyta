@@ -24,12 +24,6 @@ def send_subscription_expiration_notification(user, subscription, days_left):
             body=body,
             importance="medium",
             type="subscription_expiration",
-            data={
-                "subscription_id": subscription.subscription_id,
-                "subscription_plan": subscription.plan.name,
-                "end_date": subscription.end_date,
-                "days_left": days_left
-            },
         )
 
         send_notification(user.user_id, title, body, data)
@@ -38,11 +32,11 @@ def send_subscription_expiration_notification(user, subscription, days_left):
     except ValueError as ve:
         print(ErrorHandler.handle_validation_error(str(ve)))
     except Exception as e:
-        return ErrorHandler.handle_error(
+        print( ErrorHandler.handle_error(
             e,
             message="Internal server error while sending subscription expiration notification.",
             status_code=500
-        )
+        ))
 
 
 def send_subscription_cancelled_notification(user, subscription):
@@ -60,17 +54,15 @@ def send_subscription_cancelled_notification(user, subscription):
             'user_name': f'{user.name}',
         }
 
+        print(body)
+        print(data)
+
         GeneralUserNotification.create_notification(
             user_id=user.user_id,
             title=title,
             body=body,
             importance="medium",
-            type="subscription_canceled",
-            data={
-                "subscription_id": subscription.subscription_id,
-                "subscription_plan": subscription.plan.name,
-                "end_date": subscription.end_date,
-            }
+            type="subscription_canceled"
         )
 
         send_notification(user.user_id, title, body, data)
@@ -78,8 +70,8 @@ def send_subscription_cancelled_notification(user, subscription):
     except ValueError as ve:
         print (ErrorHandler.handle_validation_error(str(ve)))
     except Exception as e:
-        return ErrorHandler.handle_error(
+        print (ErrorHandler.handle_error(
             e,
             message="Internal server error while sending subscription cancellation notification.",
             status_code=500
-        )
+        ))

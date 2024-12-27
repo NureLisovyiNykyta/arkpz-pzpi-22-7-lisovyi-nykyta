@@ -56,16 +56,16 @@ def create_app():
         id='notify_subscription_ending',
         func=lambda: notify_subscription_expiration(app),
         trigger='interval',
-        seconds=60,
+        seconds=20,
         max_instances=1
     )
     scheduler.add_job(
         id='check_subscription_ending',
         func=lambda: check_subscription_expiration(app),
         trigger='interval',
-        seconds=60,
+        seconds=20,
         max_instances=1
     )
-    # scheduler.start()
+    scheduler.start()
 
     return app

@@ -73,7 +73,7 @@ class Sensor(db.Model):
             if not current_subscription:
                 raise ValueError("User does not have an active subscription.")
 
-            current_sensors_count = cls.query.filter_by(user_id=user_id).count()
+            current_sensors_count = cls.query.filter_by(user_id=user_id, is_archived=False).count()
             if current_sensors_count >= current_subscription.plan.max_sensors:
                 raise ValueError("You have reached the maximum number of sensors allowed by your subscription.")
 
@@ -165,7 +165,7 @@ class Sensor(db.Model):
             if not current_subscription:
                 raise ValueError("User does not have an active subscription.")
 
-            current_sensors_count = cls.query.filter_by(user_id=user_id).count()
+            current_sensors_count = cls.query.filter_by(user_id=user_id, is_archived=False).count()
             if current_sensors_count >= current_subscription.plan.max_sensors:
                 raise ValueError("You have reached the maximum number of sensors allowed by your subscription.")
 

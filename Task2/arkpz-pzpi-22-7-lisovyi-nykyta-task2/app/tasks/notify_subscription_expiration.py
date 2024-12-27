@@ -9,7 +9,7 @@ def notify_subscription_expiration(app):
     try:
         with app.app_context():
             notification_days = [5, 3, 1]
-            now = datetime.now(timezone.utc)
+            now = datetime.now()
 
             subscriptions = Subscription.query.filter(
                 Subscription.is_active == True,
@@ -23,13 +23,14 @@ def notify_subscription_expiration(app):
                     user = subscription.user
 
                     if user.email_confirmed:
-                        send_subscription_expiration_email(user, subscription, days_left)
+                        send_subscription_expiration_email(user, subscription)
 
                     send_subscription_expiration_notification(user, subscription, days_left)
 
     except Exception as e:
-        return ErrorHandler.handle_error(
-            e,
-            message="Internal server error while sending subscription ending notifications.",
-            status_code=500
-        )
+        with app.app_context():
+            return ErrorHandler.handle_error(
+                e,
+                message="Internal server error while sending subscription ending notifications.",
+                status_code=500
+            )

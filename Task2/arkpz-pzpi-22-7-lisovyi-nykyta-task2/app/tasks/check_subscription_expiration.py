@@ -13,7 +13,7 @@ def check_subscription_expiration(app):
                 Subscription.end_date <= datetime.now(timezone.utc)
             ).all()
 
-            basic_plan = SubscriptionPlan.query.filter_by(plan_name="basic").first()
+            basic_plan = SubscriptionPlan.query.filter_by(name="basic").first()
             if not basic_plan:
                 return ErrorHandler.handle_error(
                     None,
@@ -32,21 +32,18 @@ def check_subscription_expiration(app):
 
                 if subscription.plan_id == basic_plan.plan_id:
                     subscription.end_date = datetime.now(timezone.utc) + timedelta(days=subscription.plan.duration_days)
-
+                    db.session.commit()
                 else:
                     # Cancel expired subscription
                     subscription.is_active = False
                     subscription.end_date = datetime.now(timezone.utc)
 
                     # Create basic plan subscription
-                    new_subscription = Subscription(
+                    Subscription.create_subscription(
                         user_id=subscription.user_id,
                         plan_id=basic_plan.plan_id,
-                        start_date=datetime.now(timezone.utc),
-                        end_date=datetime.now(timezone.utc) + timedelta(days=basic_plan.duration_days),
-                        is_active=True
+                        duration_days=basic_plan.duration_days
                     )
-                    db.session.add(new_subscription)
 
                     #Home and sensors archiving
                     user_homes = Home.query.filter(
@@ -64,21 +61,21 @@ def check_subscription_expiration(app):
                                     sensor.is_active = False
                                     sensor.is_security_breached = False
 
+                    db.session.commit()
+
                     # Send subscription canceled email and notification
                     user = subscription.user
-
                     if user.email_confirmed:
                         send_subscription_canceled_email(user, subscription)
 
                     send_subscription_cancelled_notification(user, subscription)
 
-            db.session.commit()
 
     except Exception as e:
         with app.app_context():
             db.session.rollback()
-        return ErrorHandler.handle_error(
+            print (ErrorHandler.handle_error(
             e,
             message="Internal server error while checking subscription ending.",
             status_code=500
-        )
+            ))

@@ -179,3 +179,16 @@ class Subscription(db.Model):
         except Exception as e:
             db.session.rollback()
             raise RuntimeError("Database error while creating basic subscription") from e
+
+    @classmethod
+    def create_subscription(cls, user_id, plan_id, duration_days):
+        start_date = datetime.now(timezone.utc)
+        end_date = start_date + timedelta(days=duration_days)
+        new_subscription = cls(
+            user_id=user_id,
+            plan_id=plan_id,
+            start_date=start_date,
+            end_date=end_date,
+            is_active=True
+        )
+        db.session.add(new_subscription)

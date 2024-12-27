@@ -1,20 +1,22 @@
 from flask_mail import Message
-from flask import render_template
+from flask import render_template_string
 from app import mail
 from app.utils import ErrorHandler
 import os
 
 
-def send_subscription_expiration_email(user, subscription, days_left):
+def send_subscription_expiration_email(user, subscription):
     try:
         formatted_end_date = subscription.end_date.strftime('%A, %d %B %Y')
 
-        html_body = render_template(
-            'email_subscription_expiration.html',
+        with open("templates/email_subscription_expiration.html", "r") as html_file:
+            html_template = html_file.read()
+
+        html_body = render_template_string(
+            html_template,
             name=user.name,
             subscription_name=subscription.plan.name,
             end_date=formatted_end_date,
-            cancel_in_days=days_left,
             website_url=os.getenv('FRONTEND_LINK')
         )
 
@@ -25,7 +27,7 @@ def send_subscription_expiration_email(user, subscription, days_left):
                 Hello {user.name},
 
                 We wanted to inform you that your subscription to {subscription.plan.name} will expire on {subscription.end_date}.
-                If you do not renew your subscription, it will be canceled automatically in {days_left} days.
+                If you do not renew your subscription, it will be canceled automatically.
 
                 After cancellation:
                 - Your subscription will be replaced with a basic one.
@@ -57,8 +59,11 @@ def send_subscription_canceled_email(user, subscription):
     try:
         formatted_end_date = subscription.end_date.strftime('%A, %d %B %Y')
 
-        html_body = render_template(
-            'email_subscription_cancelled.html',
+        with open("templates/email_subscription_cancelled.html", "r") as html_file:
+            html_template = html_file.read()
+
+        html_body = render_template_string(
+            html_template,
             name=user.name,
             subscription_name=subscription.plan.name,
             end_date=formatted_end_date,

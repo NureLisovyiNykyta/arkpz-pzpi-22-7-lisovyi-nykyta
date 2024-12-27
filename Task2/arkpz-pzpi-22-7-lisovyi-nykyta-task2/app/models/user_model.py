@@ -30,6 +30,12 @@ class User(db.Model, UserMixin):
 
     subscriptions = db.relationship('Subscription', back_populates='user')
 
+    general_notifications = db.relationship(
+        'GeneralUserNotification',
+        back_populates='user',
+        cascade="all, delete-orphan"
+    )
+
     devices = db.relationship(
         'MobileDevice',
         back_populates='user',

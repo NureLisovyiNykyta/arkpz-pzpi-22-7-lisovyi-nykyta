@@ -66,7 +66,7 @@ class Home(db.Model):
             if not current_subscription:
                 raise ValueError("User does not have an active subscription.")
 
-            current_homes_count = cls.query.filter_by(user_id=user_id).count()
+            current_homes_count = cls.query.filter_by(user_id=user_id, is_archived=False).count()
             if current_homes_count >= current_subscription.plan.max_homes:
                 raise ValueError("You have reached the maximum number of homes allowed by your subscription.")
 
@@ -126,7 +126,7 @@ class Home(db.Model):
             if not current_subscription:
                 raise ValueError("User does not have an active subscription.")
 
-            current_homes_count = cls.query.filter_by(user_id=user_id).count()
+            current_homes_count = cls.query.filter_by(user_id=user_id, is_archived=False).count()
             if current_homes_count >= current_subscription.plan.max_homes:
                 raise ValueError("You have reached the maximum number of homes allowed by your subscription.")
 
