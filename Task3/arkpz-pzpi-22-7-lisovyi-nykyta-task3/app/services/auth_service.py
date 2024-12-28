@@ -27,7 +27,7 @@ def register_user(data):
                 return jsonify({'message': 'User data updated successfully.'}), 200
             raise ValueError('User already exists.')
 
-        user = User.register_user(data)
+        user = User.register_user(data, 'user')
         Subscription.create_basic_subscription(user.user_id)
 
         if not user.email_confirmed:

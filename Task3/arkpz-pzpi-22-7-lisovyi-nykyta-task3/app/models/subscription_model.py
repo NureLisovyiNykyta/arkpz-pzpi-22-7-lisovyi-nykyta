@@ -66,6 +66,42 @@ class Subscription(db.Model):
             )
 
     @classmethod
+    def get_user_subscriptions(cls, user_id):
+        try:
+            user_subscriptions = cls.query.filter_by(user_id=user_id).all()
+
+            if not user_subscriptions:
+                raise ValueError("No subscriptions found for the user.")
+
+            subscriptions = []
+            for subscription in user_subscriptions:
+
+                subscriptions.append({
+                    "subscription_id": str(subscription.subscription_id),
+                    "user_id": str(subscription.user_id),
+                    "plan": {
+                        "plan_id": str(subscription.plan.plan_id),
+                        "name": subscription.plan.name,
+                        "price": subscription.plan.price,
+                        "duration_days": subscription.plan.duration_days,
+                    },
+                    "start_date": subscription.start_date.isoformat(),
+                    "end_date": subscription.end_date.isoformat() if subscription.end_date else None,
+                    "is_active": subscription.is_active,
+                })
+
+            return jsonify({"subscriptions": subscriptions}), 200
+
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while retrieving user subscriptions",
+                status_code=500
+            )
+
+    @classmethod
     def cancel_current_subscription(cls, user_id):
         try:
             current_subscription = cls.query.filter_by(user_id=user_id, is_active=True).first()
@@ -80,6 +116,8 @@ class Subscription(db.Model):
             current_subscription.end_date = datetime.now(timezone.utc)
 
             db.session.commit()
+
+            cls.create_basic_subscription(user_id)
 
             return jsonify({"message": "Subscription cancelled successfully."}), 200
 

@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from flask_login import UserMixin
+from flask import jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
 from app.models.role_model import Role
@@ -28,7 +29,11 @@ class User(db.Model, UserMixin):
 
     role = db.relationship('Role', back_populates='users')
 
-    subscriptions = db.relationship('Subscription', back_populates='user')
+    subscriptions = db.relationship(
+        'Subscription',
+        back_populates='user',
+        cascade="all, delete-orphan"
+    )
 
     general_notifications = db.relationship(
         'GeneralUserNotification',
@@ -68,13 +73,14 @@ class User(db.Model, UserMixin):
         else:
             return None
 
+
     @staticmethod
     def get_user_by_email(email):
         user = User.query.filter_by(email=email).first()
         return user
 
     @classmethod
-    def register_user(cls, data):
+    def register_user(cls, data, role):
         try:
             name = data.get('name')
             email = data.get('email')
@@ -83,9 +89,9 @@ class User(db.Model, UserMixin):
             if not name or not email:
                 raise ValueError("Name and email are required for registration.")
 
-            role = Role.query.filter_by(role_name="user").first()
+            user_role = Role.query.filter_by(role_name=role).first()
 
-            user = cls(name=name, email=email, role_id = role.role_id)
+            user = cls(name=name, email=email, role_id = user_role.role_id)
 
             if password:
                 user.set_password(password)
@@ -130,11 +136,14 @@ class User(db.Model, UserMixin):
             if not name or not email:
                 raise ValueError("Name and email are required for Google registration.")
 
+            user_role = Role.query.filter_by(role_name="user").first()
+
             user = cls(
                 name=name,
                 email=email,
                 birthday=birthday,
-                google_id=google_id
+                google_id=google_id,
+                role_id = user_role.role_id,
             )
             db.session.add(user)
             db.session.commit()
@@ -219,3 +228,120 @@ class User(db.Model, UserMixin):
             "email_confirmed": self.email_confirmed,
             "created_at": self.created_at,
         }
+
+    @classmethod
+    def get_all_users(cls):
+        try:
+            users = cls.query.all()
+            users_list = [
+                {
+                    "user_id": str(user.user_id),
+                    "name": user.name,
+                    "email": user.email,
+                    "role": user.role.role_name if user.role else None,
+                    "created_at": user.created_at.isoformat(),
+                    "email_confirmed": user.email_confirmed
+                } for user in users
+            ]
+            return jsonify({"users": users_list}), 200
+        except Exception as e:
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while retrieving all users",
+                status_code=500
+            )
+
+    @classmethod
+    def get_user(cls, user_id):
+        try:
+            if not user_id:
+                raise ValueError("'user_id' is a required parameter.")
+
+            user = cls.query.filter_by(user_id=user_id).first()
+            if not user:
+                return ErrorHandler.handle_error(
+                    None,
+                    message="User not found",
+                    status_code=404
+                )
+
+            user_data = {
+                "user_id": str(user.user_id),
+                "name": user.name,
+                "email": user.email,
+                "role": user.role.role_name if user.role else None,
+                "created_at": user.created_at.isoformat(),
+                "email_confirmed": user.email_confirmed
+            }
+            return jsonify({"user": user_data}), 200
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while retrieving user by ID",
+                status_code=500
+            )
+
+    @classmethod
+    def delete_user(cls, user_id):
+        try:
+            if not user_id:
+                raise ValueError("'user_id' is a required parameter.")
+
+            user = cls.query.filter_by(user_id=user_id).first()
+            if not user:
+                return ErrorHandler.handle_error(
+                    None,
+                    message="User not found",
+                    status_code=404
+                )
+
+            db.session.delete(user)
+            db.session.commit()
+
+            return jsonify({"message": "User deleted successfully."}), 200
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            db.session.rollback()
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while deleting user",
+                status_code=500
+            )
+
+    @classmethod
+    def register_admin(cls, data):
+        try:
+            name = data.get('name')
+            email = data.get('email')
+            password = data.get('password')
+
+            if not name or not email:
+                raise ValueError("Name and email are required for registration.")
+
+            existing_user = cls.query.filter_by(email=email).first()
+            if existing_user:
+                raise ValueError("Email is already registered.")
+
+            user_role = Role.query.filter_by(role_name="admin").first()
+
+            admin = cls(name=name, email=email, role_id=user_role.role_id)
+
+            if password:
+                admin.set_password(password)
+
+            db.session.add(admin)
+            db.session.commit()
+
+            from app.services.email_confirm_service import send_email_confirmation
+            send_email_confirmation(admin)
+
+            return jsonify({"message": "Admin registered successfully."}), 201
+
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            db.session.rollback()
+            raise RuntimeError("Database error while user register") from e

@@ -1,15 +1,14 @@
 from flask import Blueprint, request, jsonify, render_template, current_app, url_for
 import stripe
 from app.models import SubscriptionPlan, Subscription
-from app.utils.auth_decorator import auth_required
-from datetime import datetime, timedelta
+from app.utils.auth_decorator import role_required
 from app.utils import ErrorHandler
 
 payments_bp = Blueprint('payments', __name__)
 
 
 @payments_bp.route('/create-checkout-session', methods=['POST'])
-@auth_required
+@role_required(['user']) 
 def create_checkout_session():
     try:
         data = request.json
@@ -71,7 +70,7 @@ def create_checkout_session():
         )
 
 @payments_bp.route('/success', methods=['GET'])
-@auth_required
+@role_required(['user']) 
 def payment_success():
     try:
         session_id = request.args.get('session_id')
@@ -102,7 +101,7 @@ def payment_success():
         )
 
 @payments_bp.route('/cancel', methods=['GET'])
-@auth_required
+@role_required(['user']) 
 def payment_cancel():
     return render_template('cancelled.html',
                            message="Payment was cancelled. Please try again if needed.")

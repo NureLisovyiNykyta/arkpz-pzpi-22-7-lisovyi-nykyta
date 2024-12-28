@@ -40,25 +40,19 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-    from app.routes import auth_bp, user_profile_bp, security_bp, mobile_device_bp, subscription_bp, payments_bp, notification_bp
+    from app.routes import auth_bp, user_profile_bp, security_bp, mobile_device_bp, subscription_bp, payments_bp, notification_bp, admin_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_profile_bp)
     app.register_blueprint(security_bp)
     app.register_blueprint(mobile_device_bp)
     app.register_blueprint(subscription_bp)
     app.register_blueprint(notification_bp)
+    app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(payments_bp,  url_prefix='/payments')
 
     firebase_admin.initialize_app(cred)
 
     from app.tasks import notify_subscription_expiration, check_subscription_expiration
-    scheduler.add_job(
-        id='notify_subscription_ending',
-        func=lambda: notify_subscription_expiration(app),
-        trigger='interval',
-        seconds=20,
-        max_instances=1
-    )
     scheduler.add_job(
         id='check_subscription_ending',
         func=lambda: check_subscription_expiration(app),
@@ -66,6 +60,15 @@ def create_app():
         seconds=20,
         max_instances=1
     )
+    scheduler.add_job(
+        id='notify_subscription_ending',
+        func=lambda: notify_subscription_expiration(app),
+        trigger='cron',
+        hour=12,
+        minute=0,
+        max_instances=1
+    )
+
     scheduler.start()
 
     return app
