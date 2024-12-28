@@ -1,0 +1,377 @@
+Харківський університет радіоелектроніки
+Факультет комп'ютерних наук
+
+
+Кафедра програмної інженерії
+
+
+
+ЗВІТ
+до лабораторної роботи номер 3 
+з дисципліни
+"Аналіз та рефакторинг коду"
+на тему: "РОЗРОБКА БІЗНЕС-ЛОГІКИ ТА ФУНКЦІЙ АДМІНІСТРУВАННЯ СЕРВЕРНОЇ ЧАСТИНИ ПРОГРАМНОЇ СИСТЕМИ "
+
+
+
+
+Виконав ст. гр. ПЗПІ-22-7
+Лісовий Нікіта Андрійович
+
+Перевірив
+ст. викладач кафедри ПІ
+Сокорчук Ігор Петрович
+ 
+
+
+
+
+Харків 2024
+
+
+1 МЕТА
+
+Метою роботи є розробити бізнес логіку та функції адміністрування серверної частини програмної системи безпеки будинку з датчиками відкриття дверей та вікон.
+
+2 ХІД РОБОТИ
+
+2.1. Під час виконання лабораторної роботи було розроблено наступну бізнес-логіку (опис інженерних рішень):
+?Було інтегровано Google, Google OAuth для спрощення процесу автентифікації користувачів. Це дозволяє користувачам швидко реєструватися та входити в систему за допомогою своїх облікових записів Google, що підвищує зручність і безпеку.
+?Було інтегровано Firebase Cloud Messaging (FCM), що дозволяє відправляти push-повідомлення на телефони. Firebase забезпечує швидку доставку повідомлень та простоту інтеграції, що є важливим для оперативної реакції на події у системі безпеки.
+?Було інтегровано Gmail за для відправки листів з нотифікацією про підписки, надсилання паролів після збросу та підтвердження email після регестрації.
+? Інтеграція з платіжною платформою Stripe дозволяє користувачам без проблем здійснювати фінансові транзакції, що є важливим аспектом для реалізації функціоналу преміум підписки.
+?Застосовано шифрування паролів та іншої інформації. 
+?Використано сессії та jwt токени для захисту роутів.
+	
+	2.2. Було розроблену UML-діаграму діяльності для серверної частини у Додатку А. Це графічне представлення послідовності операцій і логіки процесів, які відбуваються в серверній системі. Вона використовується для моделювання робочих процесів, алгоритмів або дій користувача та серверу. Така діаграма є частиною Unified Modeling Language (UML) і дозволяє зрозуміти логіку взаємодії компонентів у системі.
+Діаграма діяльності відображає основні процеси, пов'язані з аутентифікацією користувачів та управлінням системою. Вона поділена на два основні розділи: Аутентифікація та Управління системою.
+Процес аутентифікації починається з вибору між реєстрацією та входом.
+Реєстрація, якщо користувач уже існує та він має тільки дані Google, система додає додаткові дані. Інакше виводиться повідомлення, що користувач уже зареєстрований. Якщо користувач не існує, система зберігає нові дані.
+У випадку входу через Google, якщо користувач існує, перевіряється наявність Google-даних. Якщо їх немає, вони додаються, після чого видається токен або сесія. Якщо користувача не знайдено, створюється новий профіль із Google-даними. 
+У випадку стандартного входу, якщо користувач існує та пароль збігається, система видає токен або сесію. Якщо пароль неправильний або користувача не знайдено, виводиться відповідне повідомлення.
+Після успішної аутентифікації користувач переходить до етапу управління системою, який має два варіанти доступу: для звичайних користувачів та адміністраторів.
+Для звичайного користувача управління безпекою поділяється на дії без обмежень підписки та з обмеженнями.
+Дії без обмежень підписки включають отримання даних про будинки та сенсори, їхнє видалення, архівування та розархівування. Налаштовуються режими охорони та безпеки залежно від стану дверей. Сенсори можуть увімкнутися або залишитися вимкненими, залежно від стану дверей. Користувач отримує повідомлення про стан безпеки.
+Запити з обмеженням підписки: якщо кількість будинків або сенсорів не перевищує ліміт, користувач може додавати нові. У разі перевищення ліміту система виводить відповідне повідомлення.
+До функціоналу управління підписками можна віднести отримання даних про поточну підписку, оновити її до преміум-плану, або отримати загальні повідомлення.
+Адміністратор має можливості, такі як перегляд списку користувачів, їхнє видалення, створення підписок, скасування підписок, а також реєстрація нових адміністраторів.
+
+2.3. Також під час лабароторної роботи було створено UML-діаграму взаємодії у додатку Б. UML-діаграма взаємодії (Sequence Diagram) — це один із типів діаграм у мові моделювання UML (Unified Modeling Language), яка використовується для опису послідовності обміну повідомленнями між учасниками системи (акторами, компонентами, сервісами чи об’єктами). Головна мета такої діаграми — відобразити взаємодію між різними елементами системи у хронологічному порядку.
+На цій діаграмі показуються не лише учасники процесу, а й те, як вони взаємодіють між собою через виклики функцій, передачу даних або обмін повідомленнями. Вона дозволяє деталізувати функціонал певного сценарію або бізнес-процесу.
+Опис кожного етапу, що відображається на діаграмі:
+Реєстрація користувача:
+?користувач надсилає запит на реєстрацію (POST /register);
+?Система перевіряє, чи існує користувач у базі даних;
+?Якщо користувач уже існує, відправляється відповідь про це;
+?Якщо користувач існує з даними Google, вони оновлюються;
+?Якщо користувач не знайдений, додається новий користувач.
+
+Вхід користувача:
+?користувач надсилає запит на вхід (POST /login);
+?Система перевіряє, чи існує користувач;
+?Якщо користувача немає в системі, відправляється відповідь про помилку;
+?Якщо користувач знайдений, перевіряється правильність пароля;
+?У разі успішної перевірки пароля створюється сесія користувача.
+
+Управління домами користувача:
+?користувач може отримати список своїх домів (GET /user_homes);
+?користувач може додати новий дім (POST /add_user_home);
+?користувач може видалити дім (POST /delete_user_home/home).
+
+Управління сенсорами для дому:
+?користувач може отримати список сенсорів для свого дому (GET /home_sensors/home);
+?користувач може додати сенсор (POST /add_home_sensor);
+?користувач може видалити сенсор (POST /delete_home_sensor/sensor).
+
+Управління режимами безпеки:
+?користувач може отримати список стандартних режимів безпеки (GET /default_security_modes);
+?користувач може встановити стандартний режим безпеки для дому (PUT /set_default_security_mode);
+?Система оновлює сенсори відповідно до нового режиму безпеки.
+
+Управління підписками:
+?користувач може отримати інформацію про поточну підписку (GET /current_subscription);
+?користувач може скасувати поточну підписку (PUT /cancel_current_subscription);
+?користувач може побачити всі доступні плани підписки (GET /subscription_plans);
+?користувач може створити новий план підписки (POST /create_subscription_plan).
+
+Повідомлення користувачам:
+?користувач може отримати загальні повідомлення (GET /general_notifications);
+?користувач може отримати повідомлення з безпеки (GET /security_notifications);
+?користувач може отримати повідомлення з безпеки по конкретному дому (GET /security_notifications_by_home/home).
+
+Оплата:
+?користувач може створити сесію для оплати підписки (POST /create-checkout-session);
+?користувач може побачити успішний результат оплати (GET /success);
+?користувач може отримати повідомлення про скасування оплати (GET /cancel).
+
+Адміністративні функції:
+?адміністратор може отримати список всіх користувачів (GET /users).
+?адміністратор може отримати дані конкретного користувача (GET /user/user);
+?адміністратор може видалити користувача (POST /delete_user/user);
+?адміністратор може зареєструвати адміністратора (POST /register_admin).
+
+	2.4. Було розроблені функціал для адміністрування системи у Додатку В наведено код та продемонстровано у ютуб відео Додатку Г.
+2.5. Увесь вихідний код проєкту розміщений у репозиторії GitHub, а основні частини коду наведені в Додатку Г.
+
+
+3 ВИСНОВКИ
+
+Під час виконання лабораторної роботи було досягнуто основної мети – реалізовано бізнес-логіку та функції адміністрування серверної частини програмної системи безпеки будинку з датчиками відкриття дверей та вікон. У результаті було інтегровано наступні сучасних технології: Google OAuth для аутентифікації користувачів, Firebase Cloud Messaging (FCM) забезпечило оперативну доставку push-повідомлень, інтеграція Gmail для надсилання нотифікацій і Stripe для фінансових транзакцій дозволила покращити взаємодію з користувачами. Реалізація функціоналу безпеки забезпечено шифрування даних та використання сесій і JWT-токенів для захисту роутів, що підвищує безпеку всієї системи. 
+Реалізовано функціонла для адміністратування, включаючи управління користувачами, створення підписок та додавання нових адміністраторів, що дозволяє ефективно управляти системою.
+Створено UML-діаграми діяльності та взаємодії, які детально демонструють логіку роботи серверної частини. Ці діаграми допомагають краще зрозуміти структуру та роботу системи, а також служать важливим інструментом для подальшої розробки й тестування.
+
+
+ДОДАТОК А
+UML ДІАГРАМА ДІЯЛЬНОСТІ 
+
+?		
+Рисунок А – UML-діаграма діяльності 
+
+
+ДОДАТОК Б
+UML ДІАГРАМА ВЗАЄМОДІЇ
+
+Рисунок Б.1 – UML-діаграма взаємодії
+
+
+
+Рисунок Б.2 – UML-діаграма взаємодії
+
+
+ДОДАТОК В
+ПРОГРАМНИЙ КОД
+Приклад програмного коду розподіляння роутів по ролям користувача.
+def role_required(roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            # Проверка JWT
+            token = request.headers.get('Authorization')
+            if token:
+                try:
+                    if token.startswith("Bearer "):
+                        token = token.split(" ")[1]
+
+                    payload = JwtUtils.decode_jwt(token)
+                    user = User.query.get(payload['user_id'])
+                    if not user:
+                        return ErrorHandler.handle_error(
+                            None,
+                            message=f"User with ID '{payload['user_id']}' not found.",
+                            status_code=404
+                        )
+
+                    if user.role.role_name not in roles:
+                        return ErrorHandler.handle_error(
+                            None,
+                            message=f"User does not have the required role. Required roles: {roles}",
+                            status_code=403
+                        )
+
+                    request.current_user = user
+                except ValueError as ve:
+                    return ErrorHandler.handle_error(ve, status_code=401)
+                except Exception as e:
+                    return ErrorHandler.handle_error(
+                        e,
+                        message="Internal server error while token verify",
+                        status_code=500
+                    )
+                return f(*args, **kwargs)
+
+            if current_user.is_authenticated:
+                if current_user.role.role_name not in roles:
+                    return ErrorHandler.handle_error(
+                        None,
+                        message=f"User does not have the required role. Required roles: {roles}",
+                        status_code=403
+                    )
+                request.current_user = current_user
+                return f(*args, **kwargs)
+
+            return ErrorHandler.handle_error(
+                None,
+                message="Authentication required",
+                status_code=401
+            )
+
+        return decorated
+    return decorator
+
+Приклад програмного коду для створення роутів для адміністраторів.
+admin_bp = Blueprint('admin', __name__)
+
+@admin_bp.route('/users', methods=['Get'])
+@role_required(['admin']) 
+def get_users():
+    return User.get_all_users()
+
+@admin_bp.route('/user/user', methods=['Get'])
+@role_required(['admin']) 
+def get_user():
+    user_id = request.args.get('user')
+    return User.get_user(user_id)
+
+@admin_bp.route('/delete_user/user', methods=['Post'])
+@role_required(['admin']) 
+def delete_user():
+    user_id = request.args.get('user')
+    return User.delete_user(user_id)
+
+@admin_bp.route('/register_admin', methods=['Post'])
+@role_required(['admin']) 
+def register_admin():
+    data = request.get_json()
+    return User.refister_admin(data)
+
+@admin_bp.route('/create_subscription_plan', methods=['Post'])
+@role_required(['admin']) 
+def create_subscription_plan():
+    data = request.get_json()
+    return SubscriptionPlan.create_subscription_plan(data)
+
+@admin_bp.route('/user_subscriptions/user', methods=['Get'])
+@role_required(['admin']) 
+def get_user_subscriptions():
+    user_id = request.args.get('user')
+    return Subscription.get_current_subscription_info(user_id)
+
+@admin_bp.route('/cancel_current_user_subscription/user', methods=['Put'])
+@role_required(['admin']) 
+def cancel_current_user_subscription():
+    user_id = request.args.get('user')
+    return Subscription.cancel_current_subscription(user_id)
+
+@admin_bp.route('/general_user_notifications/user', methods=['Get'])
+@role_required(['admin']) 
+def get_user_general_notifications():
+    user_id = request.args.get('user')
+    return GeneralUserNotification.get_notifications_by_user(user_id)
+
+Приклад програмного коду для взаємодії з базою данних через методи моделей.
+@classmethod
+def get_all_users(cls):
+    try:
+        users = cls.query.all()
+        users_list = [
+            {
+                "user_id": str(user.user_id),
+                "name": user.name,
+                "email": user.email,
+                "role": user.role.name if user.role else None,
+                "created_at": user.created_at.isoformat(),
+                "email_confirmed": user.email_confirmed
+            } for user in users
+        ]
+        return jsonify({"users": users_list}), 200
+    except Exception as e:
+        return ErrorHandler.handle_error(
+            e,
+            message="Database error while retrieving all users",
+            status_code=500
+        )
+
+@classmethod
+def get_user(cls, user_id):
+    try:
+        if not user_id:
+            raise ValueError("'user_id' is a required parameter.")
+
+        user = cls.query.filter_by(user_id=user_id).first()
+        if not user:
+            return ErrorHandler.handle_error(
+                None,
+                message="User not found",
+                status_code=404
+            )
+
+        user_data = {
+            "user_id": str(user.user_id),
+            "name": user.name,
+            "email": user.email,
+            "role": user.role.name if user.role else None,
+            "created_at": user.created_at.isoformat(),
+            "email_confirmed": user.email_confirmed
+        }
+        return jsonify({"user": user_data}), 200
+    except ValueError as ve:
+        return ErrorHandler.handle_validation_error(str(ve))
+    except Exception as e:
+        return ErrorHandler.handle_error(
+            e,
+            message="Database error while retrieving user by ID",
+            status_code=500
+        )
+
+@classmethod
+def delete_user(cls, user_id):
+    try:
+        if not user_id:
+            raise ValueError("'user_id' is a required parameter.")
+
+        user = cls.query.filter_by(user_id=user_id).first()
+        if not user:
+            return ErrorHandler.handle_error(
+                None,
+                message="User not found",
+                status_code=404
+            )
+
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "User deleted successfully."}), 200
+    except ValueError as ve:
+        return ErrorHandler.handle_validation_error(str(ve))
+    except Exception as e:
+        db.session.rollback()
+        return ErrorHandler.handle_error(
+            e,
+            message="Database error while deleting user",
+            status_code=500
+        )
+@classmethod
+def create_subscription_plan(cls, data):
+    try:
+        required_fields = ['name', 'max_homes', 'max_sensors', 'price', 'duration_days']
+        for field in required_fields:
+            if field not in data:
+                raise ValueError(f"'{field}' is a required field.")
+        if not isinstance(data['max_homes'], int) or data['max_homes'] <= 0:
+            raise ValueError("'max_homes' must be a positive integer.")
+
+        if not isinstance(data['max_sensors'], int) or data['max_sensors'] <= 0:
+            raise ValueError("'max_sensors' must be a positive integer.")
+
+        if not isinstance(data['price'], (float, int)) or data['price'] <= 0:
+            raise ValueError("'price' must be a positive number.")
+
+        if not isinstance(data['duration_days'], int) or data['duration_days'] <= 0:
+            raise ValueError("'duration_days' must be a positive integer.")
+
+        new_plan = cls(
+            name=data['name'],
+            max_homes=data['max_homes'],
+            max_sensors=data['max_sensors'],
+            price=float(data['price']),
+            duration_days=data['duration_days']
+        )
+        db.session.add(new_plan)
+        db.session.commit()
+
+        return jsonify({"message": "Subscription plan created successfully."}), 201
+    except ValueError as ve:
+        return ErrorHandler.handle_validation_error(str(ve))
+    except Exception as e:
+        db.session.rollback()
+        return ErrorHandler.handle_error(
+            e,
+            message="Database error while creating subscription plan",
+            status_code=500
+        )
+ДОДАТОК Г
+ПОСИЛАННЯ 
+Посилання на файл з кодом в GitHub репозиторії:
+https://github.com/NureLisovyiNykyta/arkpz-pzpi-22-7-lisovyi-nykyta
+	
+Посилання на YouTube відео з презентацією:
+	https://youtu.be/gQwiHfWNYPA
