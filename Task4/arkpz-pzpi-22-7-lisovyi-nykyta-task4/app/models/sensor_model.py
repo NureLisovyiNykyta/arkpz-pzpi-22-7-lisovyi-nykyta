@@ -6,6 +6,7 @@ from flask import jsonify
 from app.models.subscription_model import Subscription
 from app.models.home_model import Home
 from app.services.mobile_sequrity_notification_service import send_sensor_activity_change_notification
+from app.services.mobile_sequrity_notification_service import send_sensor_security_breached_notification
 from app.utils import ErrorHandler
 
 class Sensor(db.Model):
@@ -133,7 +134,7 @@ class Sensor(db.Model):
             if not isinstance(bool_new_activity, bool):
                 raise ValueError("New activity must be a boolean value.")
 
-            sensor = cls.query.filter_by(user_id=user_id, sensor_id=sensor_id).first()
+            sensor = cls.query.filter_by(user_id=user_id, sensor_id=sensor_id, is_archived=False).first()
             if not sensor:
                 raise ValueError("Sensor not found for the specified user.")
 
@@ -143,6 +144,43 @@ class Sensor(db.Model):
             send_sensor_activity_change_notification(user_id, sensor, bool_new_activity)
 
             return jsonify({"message": f"Sensor activity was set as {new_activity}."}), 200
+
+        except ValueError as ve:
+            return ErrorHandler.handle_validation_error(str(ve))
+        except Exception as e:
+            db.session.rollback()
+            return ErrorHandler.handle_error(
+                e,
+                message="Database error while setting sensor activity",
+                status_code=500
+            )
+
+    @classmethod
+    def set_sensor_status(cls, user_id, data):
+        try:
+            sensor_id = data.get('sensor_id')
+            new_status = data.get('new_status')
+
+            if not sensor_id or not new_status:
+                raise ValueError("Sensor id, new status are required.")
+
+            bool_new_status = new_status.lower() in ['true', '1']
+            if not isinstance(bool_new_status, bool):
+                raise ValueError("New activity must be a boolean value.")
+
+            sensor = cls.query.filter_by(user_id=user_id, sensor_id=sensor_id, is_archived=False).first()
+            if not sensor:
+                raise ValueError("Sensor not found for the specified user.")
+
+            sensor.is_closed = bool_new_status
+            db.session.commit()
+
+            if sensor.is_active and not sensor.is_security_breached:
+                sensor.is_security_breached = True
+                db.session.commit()
+                send_sensor_security_breached_notification(user_id, sensor)
+
+            return jsonify({"message": f"Sensor status 'is closed' was set as {new_status}."}), 200
 
         except ValueError as ve:
             return ErrorHandler.handle_validation_error(str(ve))

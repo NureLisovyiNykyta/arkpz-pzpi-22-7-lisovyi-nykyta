@@ -6,3 +6,4 @@ from app.routes.security_routes import security_bp
 from app.routes.subscription_routes import subscription_bp
 from app.routes.notification_history_routes import notification_bp
 from app.routes.admin_routes import admin_bp
+from app.routes.iot_routes import iot_bp

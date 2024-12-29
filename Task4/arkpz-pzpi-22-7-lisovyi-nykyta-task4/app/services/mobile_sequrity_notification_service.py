@@ -73,3 +73,37 @@ def send_sensor_activity_change_notification(user_id, sensor, new_activity):
             message="Internal server error while sending sensor activity change notification.",
             status_code=500
         )
+
+def send_sensor_security_breached_notification(user_id, sensor):
+    try:
+        title = "Sensor Security Breached"
+        body = (f"The security of sensor '{sensor.name}'in home '{sensor.home.name}' was Breached. "
+                f"Check the situation and fix the problem by deactivate and activate sensor again.")
+        data = {
+            'title': title,
+            'sensor_id': f'{sensor.sensor_id}',
+            'sensor_name': f'{sensor.name}',
+            'home_id': f'{sensor.home_id}',
+            'home_name': f'{sensor.home.name}',
+        }
+
+        SecurityUserNotification.create_notification(
+            home_id=sensor.home_id,
+            title=title,
+            body=body,
+            importance="high",
+            type="sensor_security_breached",
+            sensor_id=sensor.sensor_id,
+            user_id=user_id
+        )
+
+        send_notification(user_id, title, body, data)
+
+    except ValueError as ve:
+        print(ErrorHandler.handle_validation_error(str(ve)))
+    except Exception as e:
+        return ErrorHandler.handle_error(
+            e,
+            message="Internal server error while sending sensor activity change notification.",
+            status_code=500
+        )
