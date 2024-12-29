@@ -1,0 +1,376 @@
+Харківський університет радіоелектроніки
+Факультет комп'ютерних наук
+
+
+Кафедра програмної інженерії
+
+
+
+ЗВІТ
+до лабораторної роботи номер 4 
+з дисципліни
+"Аналіз та рефакторинг коду"
+на тему: "РОЗРОБКА IoT КЛІЄНТА "
+
+
+
+
+Виконав ст. гр. ПЗПІ-22-7
+Лісовий Нікіта Андрійович
+
+Перевірив
+ст. викладач кафедри ПІ
+Сокорчук Ігор Петрович
+ 
+
+
+
+
+Харків 2024
+
+
+1 МЕТА
+
+Мета роботи полягає у розробці програмного забезпечення для SmartDevice пристрою, побудованого на основі сучасної популярної платформи, що підходить для реалізації вбудованих систем (Embedded Systems), з метою створення програмної системи безпеки будинку з датчиками відкриття дверей та вікон.
+
+2 ХІД РОБОТИ
+
+3.1. У ході виконання лабораторної роботи було розроблено систему управлінням датчиками відкриття та закриття дверей та вікон для системи безпеки будинку.
+Пристрій відкриття та закриття дверей та вікон побудовано на базі мікроконтролера ESP32, що забезпечує високу обчислювальну потужність і можливість підключення до мережі Wi-Fi. Для вимірювання відстані до об'єкта використовується ультразвуковий датчик HC-SR04. Датчик визначає відстань за допомогою випромінювання ультразвукового сигналу та вимірювання часу, необхідного для його повернення після відбиття. Для індикації стану дверей використовується світлодіод, який змінює свій стан залежно від результату вимірювань.
+Завдяки вбудованим можливостям ESP32 пристрій інтегровано з серверною системою для передачі даних через протокол HTTP до серверу через ngrok. Передача даних реалізована у форматі JSON, що забезпечує гнучкість у структурі повідомлень і спрощує їхню обробку на сервері.
+Функціональні можливості пристрою
+–	постійне моніторинг стану дверей (відкрито/закрито) на основі 	дистанції між датчиком і об'єктом;
+–	автоматична відправка стану дверей на сервер з додатковими 	параметрами (email, ID сенсора тощо);
+–	вбудований світлодіод сигналізує про зміну стану дверей для 	локального користувача;
+–	перед передачею даних здійснюється авторизація на сервері через 	email і пароль;
+–	можливість зміни ідентифікатора сенсора та налаштування 	параметрів зв’язку з сервером.
+Математична обробка даних
+Вимірювання відстані здійснюється за формулою: distance=duration?v\2, де: duration - це час, за який сигнал повертається до датчика (у мікросекундах), а v — швидкість звуку (приблизно 343 м/с або 0.034 см/мкс у стандартних умовах).
+Технічні характеристики:
+–	зв'язок з сервером через HTTP/HTTPS протокол;
+–	періодичне опитування сервера кожна 0.5 секунд;
+–	автоматичне підключення до WiFi мережі;
+–	вивід діагностичної інформації через Serial Monitor.
+Середовище розробки та емуляції:
+–	платформа Wokwi (https://wokwi.com);
+–	тунелювання локального серверу через ngrok;
+–	мова програмування: C++ (Arduino);
+–	комунікація з бекендом: REST API.
+	
+3.2. Створено UML діаграму прецедентів для ІоТ клієнта, що продемонстровано у Додатку А.
+Основні сценарії включають створення сенсора користувачем, введення даних (електронна пошта, пароль, ідентифікатор сенсора), перевірку та обробку змін стану сенсора, а також сповіщення користувача у разі порушення безпеки.
+
+3.3. Було розроблено діаграму діяльності для ІоТ клієнта, що продемонстровано у Додатку Б.
+Ця діаграма зображує процес взаємодії з Інтернетом речей (IoT), де користувач створює сенсор, вводить дані, а система обробляє зміни стану сенсора та надсилає сповіщення у разі порушення безпеки.
+Процес починається з налаштування IoT-системи. Спочатку перевіряється, чи створив користувач сенсор. Якщо так, користувач вводить свою електронну пошту, пароль та ідентифікатор сенсора. Якщо дані введені коректно, система перевіряє стан сенсора. Якщо стан сенсора змінився, система надсилає ці зміни до сервісу для подальшої обробки.
+Після того як стан сенсора зміниться, система надсилає ці дані до сервісу і продовжує обробку.
+Наступним етапом є обробка даних сенсора в сервісі. Якщо сенсор активний, перевіряється, чи було порушення безпеки. Якщо безпека порушена, сенсор позначається як порушений, і користувачу надсилається сповіщення. Якщо порушення безпеки немає, процес завершується. Якщо сенсор не активний, процес також завершується.
+
+	3.4. Було розроблені IoT пристрій для визначення сатусу “відкрито”, “закрито” та надсилання до серверу, розроблений код наведено у Додатку В. Функціонал продемонстровано у ютуб відео Додатку Г.
+
+	3.5. Було розроблені функціал для взаємодії IoT пристрою з сервером, що наведено у Додатку В. Функціонал продемонстровано у ютуб відео Додатку Г.
+
+3.6. Увесь вихідний код проєкту розміщений у репозиторії GitHub, а основні частини коду наведені в Додатку Г.
+
+
+3 ВИСНОВКИ
+
+У результаті виконання лабораторної роботи було успішно розроблено програмне забезпечення для IoT пристрою на основі мікроконтролера ESP32, що забезпечує моніторинг стану дверей та вікон у системі безпеки будинку. Пристрій використовує ультразвуковий датчик для вимірювання відстані до об'єкта і визначення стану "відкрито" чи "закрито". Зібрані дані передаються на сервер через HTTP протокол, що дозволяє оперативно обробляти інформацію та здійснювати моніторинг в реальному часі.
+Процес розробки включав створення UML діаграм прецедентів та діаграм діяльності для візуалізації логіки взаємодії користувача та системи. Ці діаграми допомогли зрозуміти основні функціональні можливості системи, такі як авторизація користувача, моніторинг стану сенсора та сповіщення у разі порушення безпеки.
+Також було реалізовано повну інтеграцію пристрою з сервером через REST API, що забезпечує безперервну передачу даних та можливість управління параметрами сенсора. 
+
+
+
+ДОДАТОК А
+UML ДІАГРАМА ПРЕЦЕДЕНТІВ
+
+Рисунок А – UML-діаграма прецедентів для розумного пристрою
+
+
+ДОДАТОК Б
+UML ДІАГРАМА ВЗАЄМОДІЇ
+
+Рисунок Б – UML-діаграма діяльності для розумного пристрою
+
+
+ДОДАТОК В
+ПРОГРАМНИЙ КОД
+Код конфігурції датчика diagram.json.
+1.{
+2.  "version": 1,
+3.  "author": "Nikita Lisovyi",
+4.  "editor": "wokwi",
+5.  "parts": [
+6.    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 23.9, "left": -91.4, "attrs": {} },
+7.    {
+8.      "type": "wokwi-hc-sr04",
+9.      "id": "ultrasonic1",
+10.      "top": -152.1,
+11.      "left": 53.5,
+12.      "attrs": { "distance": "2" }
+13.    },
+14.    { "type": "wokwi-led", "id": "led1", "top": -99.6, "left": -217, "attrs": { "color": "red" } }
+15.  ],
+16.  "connections": [
+17.    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+18.    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+19.    [ "ultrasonic1:VCC", "esp:3V3", "red", [ "v0" ] ],
+20.    [ "ultrasonic1:TRIG", "esp:D2", "green", [ "v0" ] ],
+21.    [ "ultrasonic1:ECHO", "esp:D4", "green", [ "v0" ] ],
+22.    [ "ultrasonic1:GND", "esp:GND.1", "black", [ "v0" ] ],
+23.    [ "esp:GND.2", "led1:C", "black", [ "h0" ] ],
+24.    [ "led1:A", "esp:D13", "green", [ "v0" ] ]
+25.  ],
+26.  "dependencies": {}
+27.}
+
+Код датчика sketch.ino.
+
+1.#include <WiFi.h>
+2.#include <HTTPClient.h>
+3.#include <ArduinoJson.h>
+4.
+5.// WiFi credentials
+6.const char* ssid = "Wokwi-GUEST";
+7.const char* password = "";
+8.
+9.// Server URL
+10.const char* serverUrl = "http://cc8a-91-193-174-3.ngrok-free.app/iot/send_sensor_status";
+11.
+12.// HC-SR04 pins
+13.const int trig = 2;  // Adjusted to D2 for Wokwi
+14.const int echo = 4;  // Adjusted to D4 for Wokwi
+15.
+16.// User credentials and sensor data
+17.String email = "";
+18.String userPassword = "";
+19.String sensorID = "";
+20.bool currentDoorState = false;
+21.bool previousDoorState = false;
+22.
+23.// Function to connect to Wi-Fi
+24.void setup_wifi() {
+25.  Serial.println("Connecting to WiFi...");
+26.  WiFi.begin(ssid, password);
+27.
+28.  while (WiFi.status() != WL_CONNECTED) {
+29.    delay(500);
+30.    Serial.print(".");
+31.  }
+32.
+33.  Serial.println("\nWiFi connected");
+34.  Serial.print("IP address: ");
+35.  Serial.println(WiFi.localIP());
+36.}
+37.
+38.// Function to send data to the server
+39.void sendData(bool newStatus) {
+40.  if (WiFi.status() == WL_CONNECTED) {
+41.    HTTPClient http;
+42.
+43.    Serial.print("Sending data to: ");
+44.    Serial.println(serverUrl);
+45.
+46.    http.begin(serverUrl);
+47.    http.addHeader("Content-Type", "application/json");
+48.
+49.    // Create JSON document
+50.    DynamicJsonDocument doc(1024);
+51.    doc["email"] = email;
+52.    doc["password"] = userPassword;
+53.    doc["sensor_id"] = sensorID;
+54.    doc["new_status"] = newStatus ? "true" : "false";
+55.
+56.    String requestBody;
+57.    serializeJson(doc, requestBody);
+58.
+59.    Serial.print("Request Body: ");
+60.    Serial.println(requestBody);
+61.
+62.    int httpCode = http.PUT(requestBody);
+63.    Serial.print("HTTP Response code: ");
+64.    Serial.println(httpCode);
+65.
+66.    if (httpCode == HTTP_CODE_OK) {
+67.      String response = http.getString();
+68.      Serial.print("Response: ");
+69.      Serial.println(response);
+70.    } else {
+71.      Serial.print("Error sending PUT: ");
+72.      Serial.println(httpCode);
+73.    }
+74.
+75.    http.end();
+76.    Serial.println("--------------------");
+77.  }
+78.}
+79.
+80.void setup() {
+81.  // Initialize serial communication
+82.  Serial.begin(115200);
+83.
+84.  // Initialize WiFi
+85.  setup_wifi();
+86.
+87.  // Prompt the user for credentials and sensor ID
+88.  Serial.println("Enter email:");
+89.  while (Serial.available() == 0) {
+90.    delay(100);
+91.  }
+92.  email = Serial.readStringUntil('\n');
+93.  email.trim();  // Remove whitespace
+94.
+95.  Serial.println("Enter password:");
+96.  while (Serial.available() == 0) {
+97.    delay(100);
+98.  }
+99.  userPassword = Serial.readStringUntil('\n');
+100.  userPassword.trim();  // Remove whitespace
+101.
+102.  Serial.println("Enter sensor ID:");
+103.  Serial.println("Enter password:");
+104.  while (Serial.available() == 0) {
+105.    delay(100);
+106.  }
+107.  sensorID = Serial.readStringUntil('\n');
+108.  sensorID.trim();  // Remove whitespace
+109.
+110.  // Debug print the entered values
+111.  Serial.print("Email: ");
+112.  Serial.println(email);
+113.  Serial.print("Password: ");
+114.  Serial.println(userPassword);
+115.  Serial.print("Sensor ID: ");
+116.  Serial.println(sensorID);
+117.
+118.  // Initialize HC-SR04 pins
+119.  pinMode(trig, OUTPUT);
+120.  pinMode(echo, INPUT);
+121.}
+122.
+123.void loop() {
+124.  // Clear the TRIG pin by setting it low
+125.  digitalWrite(trig, LOW);
+126.  delayMicroseconds(2);
+127.  // Send a 10 microsecond pulse to TRIG to start the measurement
+128.  digitalWrite(trig, HIGH);
+129.  delayMicroseconds(10);
+130.  digitalWrite(trig, LOW);
+131.
+132.  // Measure the time for the echo to return
+133.  long duration = pulseIn(echo, HIGH);
+134.
+135.  // Calculate distance in centimeters
+136.  long distance = (duration * 0.034) / 2;
+137.
+138.  // Determine door state based on the distance
+139.  if (distance > 40) {
+140.    currentDoorState = true;  // Door is open
+141.  } else {
+142.    currentDoorState = false;  // Door is closed
+143.  }
+144.
+145.  // Send data if the door state has changed
+146.  if (currentDoorState != previousDoorState) {
+147.    sendData(currentDoorState);
+148.    previousDoorState = currentDoorState;
+149.  }
+150.
+151.  delay(500);  // Delay for next reading
+152.}
+
+Приклад програмного коду для створення роутів для розумних пристроїв.
+1.@iot_bp.route('/send_sensor_status', methods=['Put'])
+2.def send_sensor_status():
+3.    data = request.get_json()
+4.    user = auth_service.login_user(data)
+5.    if user:
+6.        return Sensor.set_sensor_status(user.user_id, data)
+7.    return ErrorHandler.handle_error(
+8.        None,
+9.        message="Invalid credentials",
+10.        status_code=403
+11.    )
+
+Приклад програмного коду для взаємодії розумних пристроїв з базою данних через методи моделей.
+1.@classmethod
+2.def set_sensor_status(cls, user_id, data):
+3.    try:
+4.        sensor_id = data.get('sensor_id')
+5.        new_status = data.get('new_status')
+6.
+7.        if not sensor_id or not new_status:
+8.            raise ValueError("Sensor id, new status are required.")
+9.
+10.        bool_new_status = new_status.lower() in ['true', '1']
+11.        if not isinstance(bool_new_status, bool):
+12.            raise ValueError("New activity must be a boolean value.")
+13.
+14.        sensor = cls.query.filter_by(user_id=user_id, sensor_id=sensor_id, is_archived=False).first()
+15.        if not sensor:
+16.            raise ValueError("Sensor not found for the specified user.")
+17.
+18.        sensor.is_closed = bool_new_status
+19.        db.session.commit()
+20.
+21.        if sensor.is_active and not sensor.is_security_breached and not new_status:
+22.            sensor.is_security_breached = True
+23.            db.session.commit()
+24.            send_sensor_security_breached_notification(user_id, sensor)
+25.
+26.        return jsonify({"message": f"Sensor status 'is closed' was set as {new_status}."}), 200
+27.
+28.    except ValueError as ve:
+29.        return ErrorHandler.handle_validation_error(str(ve))
+30.    except Exception as e:
+31.        db.session.rollback()
+32.        return ErrorHandler.handle_error(
+33.            e,
+34.            message="Database error while setting sensor activity",
+35.            status_code=500
+36.        )
+
+Приклад програмного коду для нотифікації щодо порушення режиму захисту розумних пристроїв.
+37.def send_sensor_security_breached_notification(user_id, sensor):
+38.    try:
+39.        title = "Sensor Security Breached"
+40.      body = (f"The security of sensor '{sensor.name}'in home '{sensor.home.name}' was Breached. "
+41.        f"Check the situation and fix the problem by deactivate and activate sensor again.")
+42.        data = {
+43.            'title': title,
+44.            'sensor_id': f'{sensor.sensor_id}',
+45.            'sensor_name': f'{sensor.name}',
+46.            'home_id': f'{sensor.home_id}',
+47.            'home_name': f'{sensor.home.name}',
+48.        }
+
+49.        SecurityUserNotification.create_notification(
+50.            home_id=sensor.home_id,
+51.            title=title,
+52.            body=body,
+53.            importance="high",
+54.            type="sensor_security_breached",
+55.            sensor_id=sensor.sensor_id,
+56.            user_id=user_id
+57.        )
+58.        send_notification(user_id, title, body, data)
+59.
+60.    except ValueError as ve:
+61.        print(ErrorHandler.handle_validation_error(str(ve)))
+62.    except Exception as e:
+63.        return ErrorHandler.handle_error(
+64.            e,
+65.            message="Internal server error while sending sensor activity change notification.",
+66.            status_code=500
+67.        )
+
+
+
+ДОДАТОК Г
+ПОСИЛАННЯ 
+Посилання на файл з кодом в GitHub репозиторії:
+https://github.com/NureLisovyiNykyta/arkpz-pzpi-22-7-lisovyi-nykyta
+	
+Посилання на YouTube відео з презентацією:
+	https://youtu.be/KoSbKrfENzI
+	
