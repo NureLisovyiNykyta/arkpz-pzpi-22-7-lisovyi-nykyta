@@ -175,7 +175,7 @@ class Sensor(db.Model):
             sensor.is_closed = bool_new_status
             db.session.commit()
 
-            if sensor.is_active and not sensor.is_security_breached:
+            if sensor.is_active and not sensor.is_security_breached and not new_status:
                 sensor.is_security_breached = True
                 db.session.commit()
                 send_sensor_security_breached_notification(user_id, sensor)
