@@ -138,6 +138,13 @@ class Sensor(db.Model):
             if not sensor:
                 raise ValueError("Sensor not found for the specified user.")
 
+            if bool_new_activity:
+                if not sensor.is_closed or sensor.is_security_breached:
+                    raise ValueError("Sensor cant be set as active.")
+            else:
+                sensor.is_closed = False
+                sensor.is_security_breached = False
+
             sensor.is_active = bool_new_activity
             db.session.commit()
 
@@ -175,10 +182,11 @@ class Sensor(db.Model):
             sensor.is_closed = bool_new_status
             db.session.commit()
 
-            if sensor.is_active and not sensor.is_security_breached and not new_status:
-                sensor.is_security_breached = True
-                db.session.commit()
-                send_sensor_security_breached_notification(user_id, sensor)
+            if sensor.is_active:
+                if not sensor.is_security_breached and not new_status:
+                    sensor.is_security_breached = True
+                    db.session.commit()
+                    send_sensor_security_breached_notification(user_id, sensor)
 
             return jsonify({"message": f"Sensor status 'is closed' was set as {new_status}."}), 200
 
