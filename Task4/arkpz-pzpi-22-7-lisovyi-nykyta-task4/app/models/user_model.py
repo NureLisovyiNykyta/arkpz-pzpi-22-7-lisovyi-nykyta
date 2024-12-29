@@ -141,12 +141,14 @@ class User(db.Model, UserMixin):
             user = cls(
                 name=name,
                 email=email,
-                birthday=birthday,
-                google_id=google_id,
-                role_id = user_role.role_id,
+                google_id=google_id
             )
             db.session.add(user)
             db.session.commit()
+
+            if birthday:
+                user.birthday = birthday
+                db.session.commit()
 
             if refresh_token:
                 user.set_refresh_token(refresh_token)

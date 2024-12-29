@@ -1,5 +1,5 @@
 from app.services import auth_service, email_confirm_service
-from app.services import google_auth_service
+from app.services import google_auth_service, firebase_auth_service
 from flask import Blueprint, request
 from flask_login import login_required
 
@@ -28,6 +28,12 @@ def google_callback():
     return google_auth_service.handle_google_callback()
 
 
+@auth_bp.route('/firebase_auth', methods=['POST'])
+def firebase_auth():
+    data = request.get_json()
+    return firebase_auth_service.firebase_auth(data)
+
+
 @auth_bp.route('/confirm_email/<token>', methods=['GET'])
 def confirm_email(token):
     return email_confirm_service.verify_email_token(token)
@@ -43,9 +49,3 @@ def logout():
 def token_login():
     data = request.get_json()
     return auth_service.token_login_user(data)
-
-
-@auth_bp.route('/android/auth/google')
-def google_android_login():
-    data = request.get_json()
-    return google_auth_service.google_android_login(data)
