@@ -8,7 +8,7 @@ class GeneralUserNotification(db.Model):
     __tablename__ = 'general_user_notifications'
 
     id = db.Column(db.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = db.Column(db.UUID(as_uuid=True), db.ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.UUID(as_uuid=True), db.ForeignKey('users.user_id', ondelete='CASCADE'), nullable=False)
     title = db.Column(db.String(255), nullable=False)
     body = db.Column(db.Text, nullable=False)
     importance = db.Column(db.Enum('low', 'medium', 'high', name='importance_enum'), nullable=False)

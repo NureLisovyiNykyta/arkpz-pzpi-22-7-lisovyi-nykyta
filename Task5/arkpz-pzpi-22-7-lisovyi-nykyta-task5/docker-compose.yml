@@ -1,0 +1,40 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=mssql+pyodbc://sa:SafeHomePassword1@mssql/SafeHome?driver=ODBC+Driver+17+for+SQL+Server
+    env_file:
+      - .env
+    depends_on:
+      - mssql
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql_container
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "SafeHomePassword1"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+    command: >
+      /bin/bash -c "
+      apt-get update && apt-get install -y \
+      unixodbc-dev \
+      mssql-tools \
+      && /opt/mssql/bin/sqlservr & \
+      sleep 30 && \
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P SafeHomePassword1 -i /docker-entrypoint-initdb.d/SafeHome_db_init.sql
+      "
+    user: root  # Добавлено использование root для установки пакетов
+    networks:
+      - default
+
+
+networks:
+  default:
+    driver: bridge

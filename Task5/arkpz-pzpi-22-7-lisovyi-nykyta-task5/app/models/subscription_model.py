@@ -11,7 +11,7 @@ class Subscription(db.Model):
     __tablename__ = 'subscription'
 
     subscription_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.user_id', ondelete='CASCADE'), nullable=False)
     plan_id = db.Column(UUID(as_uuid=True), db.ForeignKey('subscription_plan.plan_id', ondelete='CASCADE'), nullable=False)
     start_date = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
     end_date = db.Column(db.DateTime, nullable=True)

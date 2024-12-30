@@ -16,7 +16,7 @@ class MobileDevice(db.Model):
     )
     user_id = db.Column(
         UUID(as_uuid=True),
-        db.ForeignKey('user.user_id', ondelete='CASCADE'),
+        db.ForeignKey('users.user_id', ondelete='CASCADE'),
         nullable=False
     )
     device_token = db.Column(db.String, nullable=False)
